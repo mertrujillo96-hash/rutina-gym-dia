@@ -1,55 +1,26 @@
-name: Prepare image assets
+name: Install Pec deck anatomy crop
 on:
   push:
     branches: [main]
     paths: ['.github/workflows/prepare-image-assets.yml']
-  workflow_dispatch:
 permissions:
   contents: write
-concurrency:
-  group: prepare-image-assets
-  cancel-in-progress: false
 jobs:
-  prepare:
+  install:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Install Pillow
-        run: python -m pip install 'Pillow==12.3.0'
-      - name: Download verified local assets
+      - name: Download exact crop
         env:
-          ANATOMY_URL: 'https://media.canva.com/v2/image-resize/format:JPG/height:3096/quality:100/uri:ifs%3A%2F%2FM%2F19edca98-99bd-45f9-b7b1-e6704ad8a6ed/watermark:F/width:620?csig=AAAAAAAAAAAAAAAAAAAAAMHv8z1nK2BVFyvgDOHcCmwS1LVbeBBY04bU3s62teNM&exp=1791390035&osig=AAAAAAAAAAAAAAAAAAAAAJdWJ3S-LjnrFMu4ZkO8suRxG5ZEyCF6CvL3bePZ5FH8&signer=media-rpc&token=AAIAAU0AJDE5ZWRjYTk4LTk5YmQtNDVmOS1iN2IxLWU2NzA0YWQ4YTZlZAAAAAABoRcqrDg4F_PcdfFyhIy-YMYDFvwEt_CEK0TDez6NrTzYw_1E6Q&x-canva-quality=thumbnail'
-          HERO_URL: 'https://media.canva.com/v2/image-resize/format:JPG/height:3060/quality:95/uri:ifs%3A%2F%2FM%2F5aad33a8-9467-44f8-a632-47305b3fd2d6/watermark:F/width:865?csig=AAAAAAAAAAAAAAAAAAAAACK-7gSwp4sAkgMvriXN3mOX4cbbS-f7HClB-GE0c-EU&exp=1791389494&osig=AAAAAAAAAAAAAAAAAAAAAFRx5ugUZggJ_75C0FYVCab93JfCh_Xoh3PYrpQb4j9p&signer=media-rpc&token=AAIAAU0AJDVhYWQzM2E4LTk0NjctNDRmOC1hNjMyLTQ3MzA1YjNmZDJkNgAAAAABoRciavAToKWSVPxr62_ckzwJM7oXwHhy7nJypnqnfRmSO05Czw&x-canva-quality=thumbnail'
+          IMG: 'https://media.canva.com/v2/image-resize/format:PNG/height:315/quality:100/uri:ifs%3A%2F%2FM%2F4fc9b589-6bfb-4d1f-aaea-70ea72f8493e/watermark:F/width:470?csig=AAAAAAAAAAAAAAAAAAAAAOGv3b6Wj8BFQaNWjwG2MhrBvZvEhmFmK2wCb5Q7Qvi8&exp=1791392381&osig=AAAAAAAAAAAAAAAAAAAAAJJVs1jbYdtsuZsZ-MeWBcqoeQb3q0ZLoJVSZgF6NIP6&signer=media-rpc&token=AAIAAU0AJDRmYzliNTg5LTZiZmItNGQxZi1hYWVhLTcwZWE3MmY4NDkzZQAAAAABoRdOeEgIsMk2j6Z50SJKFWeo4KXNiQuC3J-e46ZWYI8TxDgeNQ&x-canva-quality=thumbnail'
         run: |
-          mkdir -p assets
-          curl --fail --location --retry 2 --connect-timeout 15 "$ANATOMY_URL" -o assets/day1-anatomy-sprite.jpg
-          curl --fail --location --retry 2 --connect-timeout 15 "$HERO_URL" -o assets/day1-hero-fallback-sprite.jpg
-          python <<'PY'
-          from PIL import Image
-          from pathlib import Path
-          expected={
-            'assets/day1-anatomy-sprite.jpg':(620,3096),
-            'assets/day1-hero-fallback-sprite.jpg':(865,3060),
-          }
-          for name,size in expected.items():
-              p=Path(name)
-              im=Image.open(p); im.load()
-              if im.size != size:
-                  raise SystemExit(f'{name}: expected {size}, got {im.size}')
-              if p.stat().st_size < 100_000:
-                  raise SystemExit(f'{name}: unexpectedly small ({p.stat().st_size} bytes)')
-              print(name, im.size, p.stat().st_size)
-          PY
-      - name: Commit high-quality assets
+          mkdir -p assets/anatomy
+          curl --fail --location "$IMG" -o assets/anatomy/pec-deck.png
+          test $(wc -c < assets/anatomy/pec-deck.png) -gt 10000
+      - name: Commit crop
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add assets/day1-anatomy-sprite.jpg assets/day1-hero-fallback-sprite.jpg
-          if ! git diff --cached --quiet; then
-            git commit -m 'Mejorar calidad y disponibilidad de imágenes del Día 1'
-            git push origin HEAD:main
-          fi
+          git add assets/anatomy/pec-deck.png
+          git commit -m 'Agregar recorte anatómico Pec deck' || exit 0
+          git push origin HEAD:main
