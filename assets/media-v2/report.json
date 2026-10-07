@@ -1,11 +1,7 @@
 {
   "referenced": 48,
-  "localized": 45,
+  "localized": 46,
   "failed": [
-    {
-      "url": "https://cdn.theden.co.kr/news/photo/202407/2793_10603_2943.jpg",
-      "error": "ReadTimeout: HTTPSConnectionPool(host='cdn.theden.co.kr', port=443): Read timed out. (read timeout=18)"
-    },
     {
       "url": "https://assets.bodyspec.com/master/static/b501878f0a7eb7caf80f9760e99b7d30/b4111/man_doing_hanging_leg_raise_variation_on_captains_chair..jpg",
       "error": "HTTPError: 403 Client Error: Forbidden for url: https://assets.bodyspec.com/master/static/b501878f0a7eb7caf80f9760e99b7d30/b4111/man_doing_hanging_leg_raise_variation_on_c"
