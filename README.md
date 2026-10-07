@@ -1,3 +1,18 @@
-# rutina-gym-dia\n\nAplicación web estática para la rutina de gimnasio Día 2.\n\n- 9 ejercicios\n- 4 × 15\n- Series marcables\n- Notas por ejercicio\n- Progreso guardado localmente en el navegador\n- Sin servidor, base de datos ni inicio de sesión\n- Publicación automática con GitHub Pages\n
+# rutina-gym-dia
 
-GitHub Pages habilitado desde la rama `main` y la carpeta raíz.
+Aplicación web estática para llevar la rutina de gimnasio desde el celular.
+
+## Rutinas incluidas
+- Día 1: 9 ejercicios, todos 4 × 15
+- Día 2: 9 ejercicios, todos 4 × 15
+
+## Funciones
+- Imágenes de referencia por ejercicio
+- Instrucciones de ejecución
+- Claves y errores comunes
+- Registro de 4 series por ejercicio
+- Notas por ejercicio
+- Progreso independiente por día
+- Datos guardados localmente en el navegador
+- Sin servidor, base de datos ni inicio de sesión
+- Publicación con GitHub Pages
