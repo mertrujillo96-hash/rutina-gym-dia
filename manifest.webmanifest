@@ -1,0 +1,9 @@
+{
+  "name":"Rutina Gym Día 2",
+  "short_name":"Rutina Día 2",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#07110d",
+  "theme_color":"#07110d",
+  "icons":[]
+}
