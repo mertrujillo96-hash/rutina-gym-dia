@@ -1,5 +1,5 @@
-const C="rutina-gym-dia-v15";
-const SHELL=["./","./index.html","./manifest.webmanifest","./assets/day1-pec-deck-anatomy-figures.webp"];
+const C="rutina-gym-dia-v16";
+const SHELL=["./","./index.html","./manifest.webmanifest","./assets/pec-deck-anatomy-final.webp"];
 self.addEventListener("install",e=>{
   self.skipWaiting();
   e.waitUntil(caches.open(C).then(c=>c.addAll(SHELL)));
