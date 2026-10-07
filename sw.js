@@ -1,4 +1,4 @@
-const C="rutina-gym-dia-v18";
+const C="rutina-gym-dia-v20";
 const SHELL=["./","./index.html","./manifest.webmanifest","./assets/pec-deck-anatomy-final.webp","./assets/press-plano-anatomy-final.webp"];
 self.addEventListener("install",e=>{
   self.skipWaiting();
