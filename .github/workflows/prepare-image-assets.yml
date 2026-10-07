@@ -1,0 +1,118 @@
+name: Prepare verified image assets
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/prepare-image-assets.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: prepare-image-assets
+  cancel-in-progress: false
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install image encoder
+        run: python -m pip install 'Pillow==12.3.0'
+      - name: Extract existing photo references
+        run: |
+          mkdir -p image-diagnostics
+          cp index.html image-diagnostics/index.before.html
+          cp sw.js image-diagnostics/sw.before.js
+          node <<'JS'
+          const fs=require('fs'),vm=require('vm');
+          const html=fs.readFileSync('index.html','utf8');
+          const script=html.slice(html.indexOf('const DAYS='),html.indexOf('\nconst K='));
+          const days=vm.runInNewContext(script+';DAYS');
+          fs.writeFileSync('image-diagnostics/days.json',JSON.stringify(days,null,2));
+          JS
+      - name: Recover native anatomy and optimize original photos
+        env:
+          ANATOMY_URL: 'https://media.canva.com/v2/image-resize/format:PNG/height:1440/quality:100/uri:ifs%3A%2F%2FM%2Fca1d9e55-3c5e-41c0-bde5-f749288fad67/watermark:F/width:2595?csig=AAAAAAAAAAAAAAAAAAAAACBRdirelT2FVxIvT6Lyn8oaXngbdi8pmm9RRy-LgMpx&exp=1791390778&osig=AAAAAAAAAAAAAAAAAAAAAOx1DZ4OTUsGtNT1UXDtahyUou2ipZr0Ad8FO_hRLzWB&signer=media-rpc&token=AAIAAU0AJGNhMWQ5ZTU1LTNjNWUtNDFjMC1iZGU1LWY3NDkyODhmYWQ2NwAAAAABoRc2ApBzq76oZgdsm9uCcnA0BpUXQZCIndVnXMEhZRvmXJFfUQ&x-canva-quality=thumbnail'
+        run: |
+          python <<'PY'
+          import os,json,hashlib,io,time,concurrent.futures
+          from pathlib import Path
+          from urllib.request import Request,urlopen
+          from urllib.parse import urlsplit
+          from PIL import Image,ImageOps
+          root=Path('assets/media-v2');root.mkdir(parents=True,exist_ok=True)
+          diag=Path('image-diagnostics')
+          def download(url):
+              req=Request(url,headers={'User-Agent':'Mozilla/5.0','Accept':'image/avif,image/webp,image/*,*/*;q=0.8'})
+              with urlopen(req,timeout=18) as r:
+                  data=r.read(12*1024*1024+1)
+              if len(data)>12*1024*1024:raise ValueError('Image exceeds size budget')
+              im=Image.open(io.BytesIO(data));im.load()
+              if im.width*im.height>25000000:raise ValueError('Image exceeds pixel budget')
+              return ImageOps.exif_transpose(im).convert('RGB'),len(data)
+          report={'anatomy':[],'photos':[],'failed':[]}
+          try:
+              old=Image.open('assets/day1-anatomy-sprite.jpg');old.load()
+              report['old_sprite']={'width':old.width,'height':old.height,'bytes':Path('assets/day1-anatomy-sprite.jpg').stat().st_size}
+          except Exception as exc:report['old_sprite']={'decode_error':type(exc).__name__}
+          # Fail rather than upscale a thumbnail or publish the wrong resolution.
+          atlas,atlas_bytes=download(os.environ['ANATOMY_URL'])
+          assert atlas.size==(2595,1440),f'Expected native 2595x1440 atlas, received {atlas.size}'
+          atlas.save(diag/'anatomy-original-atlas.png')
+          names=['pec-deck','press-plano','curl-barra','predicador','push-down','copa','curl-supino','curl-prono','abdomen']
+          for i,name in enumerate(names):
+              x,y=(i%3)*865,(i//3)*480
+              card=atlas.crop((x,y,x+865,y+480))
+              for width in (620,865):
+                  im=card if width==865 else card.resize((width,round(480*width/865)),Image.Resampling.LANCZOS)
+                  path=root/f'anatomy-{name}-{width}.webp'
+                  im.save(path,'WEBP',quality=88,method=6)
+                  with Image.open(path) as test:test.load();assert test.size==im.size
+                  report['anatomy'].append({'path':str(path),'width':im.width,'height':im.height,'bytes':path.stat().st_size})
+          days=json.loads((diag/'days.json').read_text())
+          urls=sorted({p['img'] for day in days.values() for ex in day['ex'] for p in ex['p']})
+          def optimize(url):
+              started=time.monotonic()
+              try:
+                  image,old_bytes=download(url)
+                  token=hashlib.sha256(url.encode()).hexdigest()[:16]
+                  entry={'original':url,'width':image.width,'height':image.height,'original_bytes':old_bytes,'variants':[]}
+                  for width in sorted({min(192,image.width),min(640,image.width),min(1100,image.width)}):
+                      im=image if width==image.width else image.resize((width,max(1,round(image.height*width/image.width))),Image.Resampling.LANCZOS)
+                      path=root/f'photo-{token}-{width}.webp'
+                      im.save(path,'WEBP',quality=84 if width>192 else 78,method=6)
+                      entry['variants'].append({'src':'./'+str(path),'width':im.width,'height':im.height,'bytes':path.stat().st_size})
+                  entry['download_ms']=round((time.monotonic()-started)*1000)
+                  return entry,None
+              except Exception as exc:return None,{'original':url,'host':urlsplit(url).netloc,'error':type(exc).__name__}
+          manifest={}
+          with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+              for entry,error in pool.map(optimize,urls):
+                  if entry:manifest[entry['original']]=entry;report['photos'].append(entry)
+                  else:report['failed'].append(error)
+          (root/'images.json').write_text(json.dumps(manifest,ensure_ascii=False,separators=(',',':')))
+          (root/'images.js').write_text('window.GYM_IMAGES='+json.dumps(manifest,ensure_ascii=False,separators=(',',':'))+';\n')
+          (diag/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
+          Path('assets/image-optimization-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
+          print(json.dumps({'native_anatomy':len(report['anatomy']),'photos_optimized':len(report['photos']),'photos_unavailable':len(report['failed']),'old_sprite':report['old_sprite']},indent=2))
+          PY
+      - name: Commit verified assets only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/media-v2 assets/image-optimization-report.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Guardar anatomía nativa y fotos optimizadas en WebP'
+            git push origin HEAD:main
+          fi
+      - name: Preserve diagnostic files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-diagnostics
+          path: |
+            image-diagnostics/
+            assets/media-v2/
+          retention-days: 3
