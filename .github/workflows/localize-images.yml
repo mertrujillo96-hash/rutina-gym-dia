@@ -1,0 +1,117 @@
+name: Localize and optimize images
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - '.github/workflows/localize-images.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: localize-images
+  cancel-in-progress: true
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install image tools
+        run: python -m pip install 'Pillow==12.3.0' 'requests==2.32.5'
+      - name: Download and optimize referenced images
+        run: |
+          python <<'PY'
+          import re, json, hashlib, io, time
+          from pathlib import Path
+          from urllib.parse import urlsplit
+          import requests
+          from PIL import Image, ImageOps
+
+          html=Path('index.html').read_text(encoding='utf-8')
+          urls=[]
+          for u in re.findall(r'(?:img|altImg):"([^"]+)"', html):
+              if u.startswith('http') and u not in urls:
+                  urls.append(u)
+          # Include explicit runtime fallbacks too.
+          for u in re.findall(r'"https?://[^"]+"', html):
+              u=u.strip('"')
+              if ('upload.wikimedia.org' in u or 'assets.bodyspec.com' in u or 'jsdelivr.net' in u) and u not in urls:
+                  urls.append(u)
+
+          out=Path('assets/media-v2'); out.mkdir(parents=True,exist_ok=True)
+          session=requests.Session()
+          session.headers.update({
+              'User-Agent':'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36',
+              'Accept':'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+              'Accept-Language':'es-CO,es;q=0.9,en;q=0.7'
+          })
+
+          manifest={}
+          failures=[]
+          def fetch(url):
+              headers={}
+              host=urlsplit(url).netloc
+              if host:
+                  headers['Referer']='https://'+host+'/'
+              r=session.get(url,headers=headers,timeout=(7,18),allow_redirects=True)
+              r.raise_for_status()
+              if len(r.content)>14*1024*1024: raise ValueError('too large')
+              im=Image.open(io.BytesIO(r.content))
+              im.load()
+              return ImageOps.exif_transpose(im).convert('RGB'), len(r.content)
+
+          for n,url in enumerate(urls,1):
+              try:
+                  im,source_bytes=fetch(url)
+                  if im.width*im.height>28_000_000: raise ValueError('too many pixels')
+                  token=hashlib.sha256(url.encode()).hexdigest()[:16]
+                  entry={'width':im.width,'height':im.height,'sourceBytes':source_bytes}
+                  for kind,maxw,q in [('thumb',240,76),('detail',960,84)]:
+                      w=min(maxw,im.width)
+                      h=max(1,round(im.height*w/im.width))
+                      resized=im if (w,h)==im.size else im.resize((w,h),Image.Resampling.LANCZOS)
+                      path=out/f'{token}-{kind}.webp'
+                      resized.save(path,'WEBP',quality=q,method=6)
+                      entry[kind]='./'+str(path)
+                      entry[kind+'Bytes']=path.stat().st_size
+                  manifest[url]=entry
+                  print(f'OK {n}/{len(urls)} {url} -> {entry["detail"]}')
+              except Exception as exc:
+                  failures.append({'url':url,'error':type(exc).__name__+': '+str(exc)[:160]})
+                  print(f'FAIL {n}/{len(urls)} {url}: {exc}')
+
+          # Stable local copy of the high-resolution anatomy base.
+          anatomy_url='https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Muscles_front_and_back.svg/960px-Muscles_front_and_back.svg.png'
+          try:
+              im,_=fetch(anatomy_url)
+              if im.width < 900: raise ValueError(f'anatomy too small: {im.size}')
+              anatomy_path=out/'anatomy-base-960.webp'
+              im.save(anatomy_path,'WEBP',quality=90,method=6)
+              anatomy='./'+str(anatomy_path)
+          except Exception as exc:
+              anatomy=anatomy_url
+              failures.append({'url':anatomy_url,'error':'ANATOMY '+type(exc).__name__+': '+str(exc)[:160]})
+
+          (out/'images.js').write_text(
+              'window.GYM_IMAGES='+json.dumps(manifest,ensure_ascii=False,separators=(',',':'))+';\n'
+              'window.GYM_ANATOMY='+json.dumps(anatomy)+';\n',
+              encoding='utf-8'
+          )
+          (out/'report.json').write_text(json.dumps({
+              'referenced':len(urls),'localized':len(manifest),'failed':failures
+          },ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps({'referenced':len(urls),'localized':len(manifest),'failed':len(failures)},indent=2))
+          PY
+      - name: Commit optimized assets
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/media-v2
+          if ! git diff --cached --quiet; then
+            git commit -m 'Optimizar y alojar imágenes localmente'
+            git push origin HEAD:main
+          fi
