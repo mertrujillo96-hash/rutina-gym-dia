@@ -6,9 +6,6 @@
 <meta name="theme-color" content="#07110d">
 <title>Rutina Gym</title>
 <link rel="manifest" href="./manifest.webmanifest">
-<link rel="preconnect" href="https://upload.wikimedia.org" crossorigin>
-<link rel="dns-prefetch" href="//upload.wikimedia.org">
-<link rel="preload" as="image" href="https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Muscles_front_and_back.svg/960px-Muscles_front_and_back.svg.png" fetchpriority="high">
 <style>
 :root{--bg:#07110d;--card:#0c1712;--card2:#102019;--line:#1d372a;--text:#f5faf7;--muted:#9fb0a7;--g:#31e886;--g2:#19b761;--r:#ff6b6b;--y:#ffd84d}
 *{box-sizing:border-box}html,body{margin:0;background:radial-gradient(circle at 90% 0,rgba(49,232,134,.10),transparent 23%),var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}button,textarea{font:inherit}.app{max-width:760px;margin:auto;padding:18px 16px 110px;min-height:100vh}.hidden{display:none!important}
@@ -24,7 +21,7 @@
 .bottom{position:fixed;left:0;right:0;bottom:0;background:rgba(4,8,6,.94);backdrop-filter:blur(12px);border-top:1px solid #15241c}.bottomin{max-width:760px;margin:auto;display:grid;grid-template-columns:repeat(3,1fr);padding:8px 14px 12px}.bottom button{border:0;background:transparent;color:#8da097;min-height:58px;font-weight:800}.bottom button.active{color:var(--g)}
 @media(max-width:560px){.title h1{font-size:30px}.badge{display:none}.daySelector{grid-template-columns:repeat(2,1fr)}.summary{grid-template-columns:1fr}.item{grid-template-columns:40px 68px 1fr}.thumbWrap{width:68px;height:56px}.pill{grid-column:3;justify-self:start}.grid2,.stats{grid-template-columns:1fr}.srow{grid-template-columns:repeat(2,1fr)}.dhead{flex-direction:column}.seriesBadge{font-size:20px}.progressDays{grid-template-columns:repeat(2,1fr)}}
 </style>
-</head>
+<script src="./assets/media-v2/images.js"></script>\n</head>
 <body>
 <div class="app">
 <section id="home">
@@ -146,6 +143,7 @@ let S={day:1,i:0,p:0,days:{}};
 function blankDay(d){return{sets:DAYS[d].ex.map(()=>[false,false,false,false]),notes:DAYS[d].ex.map(()=>"")}}
 Object.keys(DAYS).forEach(d=>{S.days[d]=blankDay(Number(d))});
 try{const x=JSON.parse(localStorage.getItem(K)||"null");if(x&&x.days){S={...S,...x};Object.keys(DAYS).forEach(d=>{if(!S.days[d])S.days[d]=blankDay(Number(d))})}}catch{}
+function localImage(url,kind="detail"){const m=window.GYM_IMAGES&&window.GYM_IMAGES[url];return m&&m[kind]?m[kind]:url}
 const $=id=>document.getElementById(id),SC={home:$("home"),detail:$("detail"),progress:$("progressScreen")};
 const curEx=()=>DAYS[S.day].ex, curState=()=>S.days[S.day], save=()=>localStorage.setItem(K,JSON.stringify(S));
 function count(i,d=S.day){return S.days[d].sets[i].filter(Boolean).length}
@@ -159,10 +157,10 @@ function home(){
   const ds=$("daySelector");ds.innerHTML="";
   Object.keys(DAYS).map(Number).forEach(d=>{const b=document.createElement("button");b.className="dayCard"+(S.day===d?" active":"");b.innerHTML='<div class="label">Rutina</div><div class="dtitle">'+DAYS[d].title+'</div><div class="dprogress">'+totalEx(d)+'/'+DAYS[d].ex.length+' ejercicios · '+pct(d)+'%</div>';b.onclick=()=>switchDay(d);ds.appendChild(b)});
   $("homeProgressLabel").textContent="Progreso "+DAYS[S.day].title;$("pct").textContent=pct()+"%";$("homeFill").style.width=pct()+"%";$("summaryTitle").textContent=DAYS[S.day].title;$("summaryText").textContent=curEx().length+" ejercicios · progreso independiente";$("start").textContent="▶ Comenzar "+DAYS[S.day].title;
-  const box=$("list");box.innerHTML="";curEx().forEach((x,i)=>{const b=document.createElement("button");b.className="item";b.innerHTML='<span class="num">'+(done(i)?"✓":i+1)+'</span><span class="thumbWrap"><img class="thumb" src="'+x.p[0].img+'" alt="" loading="lazy" decoding="async" fetchpriority="low" referrerpolicy="no-referrer" width="82" height="60"></span><span><span class="ename">'+x.n+'</span><span class="sub">'+x.s+'</span></span><span class="pill">4 × 15</span>';b.querySelector("img").onerror=e=>{e.target.style.display="none";e.target.parentElement.textContent="🏋️"};b.onclick=()=>{S.i=i;S.p=0;screen("detail")};box.appendChild(b)})
+  const box=$("list");box.innerHTML="";curEx().forEach((x,i)=>{const b=document.createElement("button");b.className="item";b.innerHTML='<span class="num">'+(done(i)?"✓":i+1)+'</span><span class="thumbWrap"><img class="thumb" src="'+localImage(x.p[0].img,"thumb")+'" alt="" loading="lazy" decoding="async" fetchpriority="low" referrerpolicy="no-referrer" width="82" height="60"></span><span><span class="ename">'+x.n+'</span><span class="sub">'+x.s+'</span></span><span class="pill">4 × 15</span>';b.querySelector("img").onerror=e=>{const im=e.target,orig=x.p[0].img;if(im.dataset.externalTried!=="1"&&im.src!==orig){im.dataset.externalTried="1";im.src=orig;return}im.style.display="none";im.parentElement.textContent="🏋️"};b.onclick=()=>{S.i=i;S.p=0;screen("detail")};box.appendChild(b)})
 }
 function lis(el,a){el.innerHTML="";a.forEach(v=>{const li=document.createElement("li");li.textContent=v;el.appendChild(li)})}
-const ANATOMY_SRC="https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Muscles_front_and_back.svg/960px-Muscles_front_and_back.svg.png";
+const ANATOMY_SRC=window.GYM_ANATOMY||"https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Muscles_front_and_back.svg/960px-Muscles_front_and_back.svg.png";
 const ZONES={
   chest:[{l:13,t:18,w:12,h:12},{l:25,t:18,w:12,h:12}],
   frontShoulder:[{l:8,t:17,w:7,h:12},{l:38,t:17,w:7,h:12}],
@@ -203,14 +201,14 @@ const DAY1_FALLBACKS={
 function warmImage(url){if(!url)return;const im=new Image();im.decoding="async";im.referrerPolicy="no-referrer";im.src=url}
 function prefetchAdjacent(){
   const ex=curEx(),ids=[S.i-1,S.i+1].filter(i=>i>=0&&i<ex.length);
-  const work=()=>ids.forEach(i=>warmImage(ex[i].p[0].img));
+  const work=()=>ids.forEach(i=>warmImage(localImage(ex[i].p[0].img,"detail")));
   if("requestIdleCallback"in window)requestIdleCallback(work,{timeout:1000});else setTimeout(work,250);
 }
 function loadExerciseImage(q,x){
   const photo=$("photo"),hero=photo.parentElement;
   hero.classList.add("imgLoading");hero.classList.remove("imgReady");
   photo.style.display="block";$("fallback").style.display="none";photo.alt=q.l;photo.decoding="async";photo.fetchPriority="high";photo.referrerPolicy="no-referrer";
-  const candidates=[q.img,q.altImg,S.day===1?DAY1_FALLBACKS[x.n]:null].filter(Boolean);
+  const candidates=[localImage(q.img,"detail"),q.img,q.altImg?localImage(q.altImg,"detail"):null,q.altImg,S.day===1?DAY1_FALLBACKS[x.n]:null].filter((v,i,a)=>v&&a.indexOf(v)===i);
   let i=0,timer;
   const next=()=>{clearTimeout(timer);if(i>=candidates.length){photo.style.display="none";$("fallback").style.display="grid";hero.classList.remove("imgLoading");return}
     const src=candidates[i++];photo.onload=()=>{clearTimeout(timer);hero.classList.remove("imgLoading");hero.classList.add("imgReady");prefetchAdjacent()};photo.onerror=next;photo.src=src;timer=setTimeout(()=>{if(!photo.complete)next()},6500)};
