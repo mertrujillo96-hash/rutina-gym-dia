@@ -1,0 +1,43 @@
+name: Build Press plano anatomy asset
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/build-press-anatomy.yml']
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install Pillow
+      - name: Download source and crop anatomy card
+        env:
+          SRC: 'https://media.canva.com/v2/image-resize/format:PNG/height:1536/quality:100/uri:ifs%3A%2F%2FM%2Ffb1a20d2-12c6-486f-af36-565ece9c3f7e/watermark:F/width:864?csig=AAAAAAAAAAAAAAAAAAAAAOVaPtv5YR_L9G-zf3mSylYVzM2fJHL745rJE01HUL6H&exp=1791395657&osig=AAAAAAAAAAAAAAAAAAAAAN_k2Qfc0MWeBhvpp6EPIKK_ouAEN6svWjd4dCMr7pD9&signer=media-rpc&token=AAIAAU0AJGZiMWEyMGQyLTEyYzYtNDg2Zi1hZjM2LTU2NWVjZTljM2Y3ZQAAAAABoReAdShsIGZv-J-3aHz7gNvDoaBgjDfyuIUs4oFRr22l1mhpSQ&x-canva-quality=thumbnail'
+        run: |
+          curl -fL --retry 2 "$SRC" -o /tmp/source.png
+          python - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          im=Image.open('/tmp/source.png').convert('RGB')
+          print('source',im.size)
+          # Exact anatomy card from the supplied 864x1536 mockup.
+          card=im.crop((34,606,832,1054))
+          Path('assets').mkdir(exist_ok=True)
+          card.save('assets/press-plano-anatomy-final.webp','WEBP',quality=90,method=6)
+          test=Image.open('assets/press-plano-anatomy-final.webp')
+          print('crop',test.size,Path('assets/press-plano-anatomy-final.webp').stat().st_size)
+          assert test.width>700 and test.height>400
+          PY
+      - name: Commit
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add assets/press-plano-anatomy-final.webp
+          git commit -m "Agregar anatomía exacta de Press plano" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
