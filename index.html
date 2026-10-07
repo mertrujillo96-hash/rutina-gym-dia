@@ -185,10 +185,14 @@ function zoneHtml(k,type){return (ZONES[k]||[]).map(z=>'<span class="zone '+type
 function renderMuscles(q){
   const panel=$("musclePanel"),stage=$("anatomyStage");
   if(S.day!==1||!q.m||!q.m.length){panel.classList.add("hidden");stage.innerHTML="";return}
-  const key=(q.hp&&q.hp[0])||"chest",info=MUSCLE_INFO[key]||MUSCLE_INFO.chest;
+  const ex=curEx()[S.i],key=(q.hp&&q.hp[0])||"chest",info=MUSCLE_INFO[key]||MUSCLE_INFO.chest;
   panel.classList.remove("hidden");
   $("muscleMain").textContent=info.name;$("muscleLocation").textContent=info.loc;$("muscleFeel").textContent=info.feel;
   const support=(q.m||[]).slice(1);$("muscleSupport").textContent=support.join(", ");$("muscleSupportLine").style.display=support.length?"block":"none";
+  if(ex.n==="Pec deck"){
+    stage.innerHTML='<img class="anatomyBase" src="./assets/anatomy/pec-deck.png" alt="Anatomía trabajada en Pec deck" decoding="async" fetchpriority="high" style="object-fit:contain">';
+    return;
+  }
   stage.innerHTML='<img class="anatomyBase" src="'+ANATOMY_SRC+'" alt="Vista anatómica frontal y posterior" decoding="async" fetchpriority="high" referrerpolicy="no-referrer">'+
     (q.hs||[]).map(k=>zoneHtml(k,"secondary")).join("")+(q.hp||[]).map(k=>zoneHtml(k,"primary")).join("")+
     '<span class="muscleCallout '+info.call+'">'+info.label+'</span><div class="viewTags"><span>Vista frontal</span><span>Vista trasera</span></div>';
