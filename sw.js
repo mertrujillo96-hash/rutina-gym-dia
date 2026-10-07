@@ -1,4 +1,4 @@
-const C="rutina-gym-dia-v7";
+const C="rutina-gym-dia-v8";
 self.addEventListener("install",e=>{self.skipWaiting();e.waitUntil(caches.open(C).then(c=>c.addAll(["./","./index.html","./manifest.webmanifest"])))});
 self.addEventListener("activate",e=>{e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==C).map(k=>caches.delete(k)))),self.clients.claim()]))});
 self.addEventListener("fetch",e=>{
