@@ -1,5 +1,5 @@
-const C="rutina-gym-dia-v11";
-self.addEventListener("install",e=>{self.skipWaiting();e.waitUntil(caches.open(C).then(c=>c.addAll(["./","./index.html","./manifest.webmanifest"])))});
+const C="rutina-gym-dia-v12";
+self.addEventListener("install",e=>{self.skipWaiting();e.waitUntil(caches.open(C).then(c=>c.addAll(["./","./index.html","./manifest.webmanifest","./assets/day1-anatomy-sprite.b64"])))});
 self.addEventListener("activate",e=>{e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==C).map(k=>caches.delete(k)))),self.clients.claim()]))});
 self.addEventListener("fetch",e=>{
   if(e.request.method!=="GET")return;
