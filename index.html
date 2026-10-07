@@ -162,10 +162,6 @@ function home(){
 }
 function lis(el,a){el.innerHTML="";a.forEach(v=>{const li=document.createElement("li");li.textContent=v;el.appendChild(li)})}
 const ANATOMY_SRC=window.GYM_ANATOMY||"https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Muscles_front_and_back.svg/960px-Muscles_front_and_back.svg.png";
-const ANATOMY_ASSETS={
-  "Pec deck":"./assets/pec-deck-anatomy-final.webp",
-  "Press plano":"./assets/anatomy/day1/press-plano-target.svg"
-};
 const ZONES={
   chest:[{l:13,t:18,w:12,h:12},{l:25,t:18,w:12,h:12}],
   frontShoulder:[{l:8,t:17,w:7,h:12},{l:38,t:17,w:7,h:12}],
@@ -202,12 +198,7 @@ function renderMuscles(q){
   }
   if(ex&&ex.n==="Press plano"){
     panel.classList.add("pressPlanoCard");
-    stage.classList.add("exactCrop");
-    const src=ANATOMY_ASSETS["Press plano"];
-    stage.innerHTML='<img src="'+src+'?v=21" alt="Target muscular del Press plano" style="display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center" decoding="async" fetchpriority="high">';
-    return;
-  }
-  stage.classList.remove("exactCrop");
+    stage.classList.remove("exactCrop");
     stage.innerHTML='<img class="anatomyBase" src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Muscles_front_and_back.svg" alt="Anatomía frontal y posterior del Press plano" decoding="async" fetchpriority="high">'+
       '<span class="zone primary" style="left:13%;top:18%;width:12%;height:12%"></span>'+
       '<span class="zone primary" style="left:25%;top:18%;width:12%;height:12%"></span>'+
