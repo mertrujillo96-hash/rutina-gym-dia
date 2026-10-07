@@ -192,7 +192,7 @@ function renderMuscles(q){
   if(ex&&ex.n==="Pec deck"){
     panel.classList.add("pecDeckCard");
     stage.classList.add("exactCrop");
-    stage.innerHTML='<img class="anatomyBase" src="./assets/day1-pec-deck-anatomy.webp" alt="Tarjeta anatómica del Pec deck: pectoral mayor y deltoide anterior" decoding="async" fetchpriority="high">';
+    stage.innerHTML='<img class="anatomyBase" src="./assets/day1-pec-deck-anatomy.webp?v=16" alt="Tarjeta anatómica del Pec deck: pectoral mayor y deltoide anterior" decoding="async" fetchpriority="high" onerror="this.onerror=null;this.src=\'./assets/day1-pec-deck-anatomy-figures.webp?v=16\'">';
     return;
   }
   stage.classList.remove("exactCrop");
