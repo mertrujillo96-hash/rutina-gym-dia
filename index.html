@@ -161,14 +161,7 @@ const DAY1_ANATOMY_INDEX={
   "Curl prono mancuerna":7,
   "Abdomen":8
 };
-let anatomySpriteDataUrl="";
-async function ensureAnatomySprite(){
-  if(anatomySpriteDataUrl)return anatomySpriteDataUrl;
-  const r=await fetch("./assets/day1-anatomy-sprite.b64",{cache:"force-cache"});
-  if(!r.ok)throw new Error("No se pudo cargar la anatomía");
-  anatomySpriteDataUrl="data:image/jpeg;base64,"+(await r.text()).trim();
-  return anatomySpriteDataUrl;
-}
+const DAY1_ANATOMY_SRC="./assets/day1-anatomy-sprite.jpg";
 function renderMuscles(q){
   const panel=$("musclePanel"),img=$("anatomySprite");
   if(S.day!==1){panel.classList.add("hidden");return}
@@ -177,14 +170,9 @@ function renderMuscles(q){
   if(idx===undefined){panel.classList.add("hidden");return}
   panel.classList.remove("hidden");
   img.alt="Tarjeta anatómica de "+ex.n;
-  const offset=idx*(100/9);
-  img.style.transform="translateY(-"+offset+"%)";
-  if(!img.src||!img.src.startsWith("data:image/jpeg;base64,")){
-    ensureAnatomySprite().then(src=>{
-      img.src=src;
-      img.style.transform="translateY(-"+offset+"%)";
-    }).catch(()=>panel.classList.add("hidden"));
-  }
+  img.src=DAY1_ANATOMY_SRC;
+  img.style.transform="translateY(-"+(idx*(100/9))+"%)";
+  img.onerror=()=>panel.classList.add("hidden");
 }
 function detail(){
   const x=curEx()[S.i];if(!x){S.i=0;return detail()} if(S.p>=x.p.length)S.p=0;const q=x.p[S.p];
