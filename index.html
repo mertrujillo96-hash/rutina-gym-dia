@@ -196,6 +196,12 @@ function renderMuscles(q){
     stage.innerHTML='<img src="./assets/pec-deck-anatomy-final.webp?v=17" alt="Tarjeta anatómica del Pec deck: pectoral mayor y deltoide anterior" style="display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center" decoding="async" fetchpriority="high" onerror="this.onerror=null;this.src=\'./assets/day1-pec-deck-anatomy.webp?v=17\'">';
     return;
   }
+  if(ex&&ex.n==="Press plano"){
+    panel.classList.add("pecDeckCard");
+    stage.classList.add("exactCrop");
+    stage.innerHTML='<img src="https://media.canva.com/v2/image-resize/format:JPG/height:112/quality:75/uri:ifs%3A%2F%2FM%2F95fab8cc-df23-4fd5-bba7-aa8fee00af3f/watermark:F/width:200?csig=AAAAAAAAAAAAAAAAAAAAAJdv99KovGPcc86BxyOkL1XSDcxHGHko8JURWSNKIfoX&exp=1791396038&osig=AAAAAAAAAAAAAAAAAAAAAEaAN9sP4bVyr_4SV31QSCCDvelKopujg7dUr53BjOOt&signer=media-rpc&token=AAIAAU0AJDk1ZmFiOGNjLWRmMjMtNGZkNS1iYmE3LWFhOGZlZTAwYWYzZgAAAAABoReGRXB6L8vfyKWfLO7MMVjt7d1mL_Hoec25U0FNUvCMcGfUCg&x-canva-quality=thumbnail" alt="Tarjeta anatómica de Press plano" style="display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center" decoding="async" fetchpriority="high" referrerpolicy="no-referrer">';
+    return;
+  }
   stage.classList.remove("exactCrop");
   stage.innerHTML='<img class="anatomyBase" src="'+ANATOMY_SRC+'" alt="Vista anatómica frontal y posterior" decoding="async" fetchpriority="high" referrerpolicy="no-referrer">'+
     (q.hs||[]).map(k=>zoneHtml(k,"secondary")).join("")+(q.hp||[]).map(k=>zoneHtml(k,"primary")).join("")+
