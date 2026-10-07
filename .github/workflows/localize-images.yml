@@ -113,5 +113,6 @@ jobs:
           git add assets/media-v2
           if ! git diff --cached --quiet; then
             git commit -m 'Optimizar y alojar imágenes localmente'
+            git pull --rebase origin main
             git push origin HEAD:main
           fi
