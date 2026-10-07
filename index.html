@@ -191,7 +191,7 @@ function renderMuscles(q){
   const support=(q.m||[]).slice(1);$("muscleSupport").textContent=support.join(", ");$("muscleSupportLine").style.display=support.length?"block":"none";
   if(ex&&ex.n==="Pec deck"){
     stage.classList.add("exactCrop");
-    stage.innerHTML='<img class="anatomyBase" src="./assets/day1-pec-deck-anatomy-figures.webp" alt="Anatomía del Pec deck: pecho y hombros" decoding="async" fetchpriority="high">';
+    stage.innerHTML='<img class="anatomyBase" src="./assets/pec-deck-anatomy-final.webp" alt="Tarjeta anatómica del Pec deck: pectoral mayor y deltoide anterior" decoding="async" fetchpriority="high">';
     return;
   }
   stage.classList.remove("exactCrop");
