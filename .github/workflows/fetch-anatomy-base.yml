@@ -1,0 +1,27 @@
+name: Fetch anatomy base
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fetch-anatomy-base.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download detailed anatomy base
+        run: |
+          mkdir -p assets/anatomy/day1
+          curl -fL --retry 3 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Muscles_front_and_back.svg/960px-Muscles_front_and_back.svg.png' -o assets/anatomy/day1/muscles-front-back.png
+          test $(wc -c < assets/anatomy/day1/muscles-front-back.png) -gt 50000
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/anatomy/day1/muscles-front-back.png
+          git commit -m 'Agregar base anatómica detallada local' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
