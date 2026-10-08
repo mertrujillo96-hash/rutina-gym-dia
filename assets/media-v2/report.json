@@ -1,14 +1,10 @@
 {
-  "referenced": 49,
+  "referenced": 48,
   "localized": 46,
   "failed": [
     {
       "url": "https://assets.bodyspec.com/master/static/b501878f0a7eb7caf80f9760e99b7d30/b4111/man_doing_hanging_leg_raise_variation_on_captains_chair..jpg",
       "error": "HTTPError: 403 Client Error: Forbidden for url: https://assets.bodyspec.com/master/static/b501878f0a7eb7caf80f9760e99b7d30/b4111/man_doing_hanging_leg_raise_variation_on_c"
-    },
-    {
-      "url": "https://upload.wikimedia.org/wikipedia/commons/e/ef/Muscles_front_and_back.svg",
-      "error": "UnidentifiedImageError: cannot identify image file <_io.BytesIO object at 0x7fc98b305df0>"
     },
     {
       "url": "https://cdn.jsdelivr.net/npm/@bryllim/workout-guide@1.0.0/assets/dumbbell-overhead-tricep-extension/frame-2.svg",
