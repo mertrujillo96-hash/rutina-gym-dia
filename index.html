@@ -183,15 +183,6 @@ const MUSCLE_INFO={
   rearShoulder:{name:"Deltoide posterior",loc:"Parte trasera del hombro.",feel:"Detrás del hombro.",label:"HOMBRO",call:"call-rearShoulder"}
 };
 function zoneHtml(k,type){return (ZONES[k]||[]).map(z=>'<span class="zone '+type+'" style="left:'+z.l+'%;top:'+z.t+'%;width:'+z.w+'%;height:'+z.h+'%"></span>').join("")}
-const DAY1_BODY_ASSETS={
-  "Curl barra":"./assets/anatomy/day1/curl-barra-body.svg",
-  "Predicador mancuerna":"./assets/anatomy/day1/predicador-mancuerna-body.svg",
-  "Push down":"./assets/anatomy/day1/push-down-body.svg",
-  "Copa":"./assets/anatomy/day1/copa-body.svg",
-  "Curl supino antebrazo":"./assets/anatomy/day1/curl-supino-antebrazo-body.svg",
-  "Curl prono mancuerna":"./assets/anatomy/day1/curl-prono-mancuerna-body.svg",
-  "Abdomen":"./assets/anatomy/day1/abdomen-body.svg"
-};
 function renderMuscles(q){
   const panel=$("musclePanel"),stage=$("anatomyStage"),ex=curEx()[S.i];
   panel.classList.remove("pecDeckCard","pressPlanoCard","pressBodyCard","day1BodyCard");if(S.day!==1||!q.m||!q.m.length){panel.classList.add("hidden");stage.innerHTML="";return}
@@ -209,13 +200,6 @@ function renderMuscles(q){
     panel.classList.add("pressBodyCard");
     stage.classList.add("exactCrop");
     stage.innerHTML='<img src="./assets/anatomy/day1/press-plano-body.webp?v=28" alt="Anatomía muscular del Press plano" style="display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center" decoding="async" fetchpriority="high">';
-    return;
-  }
-  const day1Body=DAY1_BODY_ASSETS[ex&&ex.n];
-  if(day1Body){
-    panel.classList.add("day1BodyCard");
-    stage.classList.add("exactCrop");
-    stage.innerHTML='<img src="'+day1Body+'?v=29" alt="Anatomía muscular de '+ex.n+'" style="display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center" decoding="async" fetchpriority="high">';
     return;
   }
   stage.classList.remove("exactCrop");
