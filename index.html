@@ -203,17 +203,6 @@ function renderMuscles(q){
     return;
   }
   stage.classList.remove("exactCrop");
-    stage.innerHTML='<img class="anatomyBase" src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Muscles_front_and_back.svg" alt="Anatomía frontal y posterior del Press plano" decoding="async" fetchpriority="high">'+
-      '<span class="zone primary" style="left:13%;top:18%;width:12%;height:12%"></span>'+
-      '<span class="zone primary" style="left:25%;top:18%;width:12%;height:12%"></span>'+
-      '<span class="zone secondary" style="left:8%;top:17%;width:7%;height:12%"></span>'+
-      '<span class="zone secondary" style="left:38%;top:17%;width:7%;height:12%"></span>'+
-      '<span class="zone secondary" style="left:56%;top:27%;width:6.5%;height:16%"></span>'+
-      '<span class="zone secondary" style="left:89%;top:27%;width:6.5%;height:16%"></span>'+
-      '<span class="muscleCallout call-chest">PECHO</span><div class="viewTags"><span>Vista frontal</span><span>Vista trasera</span></div>';
-    return;
-  }
-  stage.classList.remove("exactCrop");
   stage.innerHTML='<img class="anatomyBase" src="'+ANATOMY_SRC+'" alt="Vista anatómica frontal y posterior" decoding="async" fetchpriority="high" referrerpolicy="no-referrer">'+
     (q.hs||[]).map(k=>zoneHtml(k,"secondary")).join("")+(q.hp||[]).map(k=>zoneHtml(k,"primary")).join("")+
     '<span class="muscleCallout '+info.call+'">'+info.label+'</span><div class="viewTags"><span>Vista frontal</span><span>Vista trasera</span></div>';
