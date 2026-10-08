@@ -1,5 +1,5 @@
-const C="rutina-gym-dia-v29";
-const SHELL=["./","./index.html","./manifest.webmanifest","./assets/pec-deck-anatomy-final.webp","./assets/anatomy/day1/press-plano-body.webp","./assets/anatomy/day1/curl-barra-body.svg","./assets/anatomy/day1/predicador-mancuerna-body.svg","./assets/anatomy/day1/push-down-body.svg","./assets/anatomy/day1/copa-body.svg","./assets/anatomy/day1/curl-supino-antebrazo-body.svg","./assets/anatomy/day1/curl-prono-mancuerna-body.svg","./assets/anatomy/day1/abdomen-body.svg"];
+const C="rutina-gym-dia-v30";
+const SHELL=["./","./index.html","./manifest.webmanifest","./assets/pec-deck-anatomy-final.webp","./assets/anatomy/day1/press-plano-body.webp","./assets/anatomy/day1/curl-barra-body.webp","./assets/anatomy/day1/predicador-mancuerna-body.svg","./assets/anatomy/day1/push-down-body.svg","./assets/anatomy/day1/copa-body.svg","./assets/anatomy/day1/curl-supino-antebrazo-body.svg","./assets/anatomy/day1/curl-prono-mancuerna-body.svg","./assets/anatomy/day1/abdomen-body.svg"];
 self.addEventListener("install",e=>{
   self.skipWaiting();
   e.waitUntil(caches.open(C).then(c=>c.addAll(SHELL)));
