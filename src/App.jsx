@@ -1,5 +1,6 @@
 import React,{useEffect,useMemo,useState} from "react";
 import {DAYS,STORAGE_KEY} from "./data/workouts";
+import {localImage} from "./data/imageMap";
 import ExerciseImage from "./components/ExerciseImage";
 import AnatomyCard from "./components/AnatomyCard";
 
@@ -18,39 +19,6 @@ function makeInitialState(){
   }catch{}
   return s;
 }
-function localImage(url,kind="detail"){
-  const m=window.GYM_IMAGES?.[url];
-  return m?.[kind]||url;
-}
-
-function preloadExerciseImage(exercise,partIndex=0){
-  const part=exercise?.p?.[partIndex]||exercise?.p?.[0];
-  if(!part)return Promise.resolve();
-  const candidates=[
-    localImage(part.img,"detail"),
-    part.img,
-    part.altImg?localImage(part.altImg,"detail"):null,
-    part.altImg
-  ].filter((v,i,a)=>v&&a.indexOf(v)===i);
-  return new Promise(resolve=>{
-    let done=false,pos=0;
-    const finish=()=>{if(done)return;done=true;clearTimeout(timer);resolve()};
-    const next=()=>{
-      if(done||pos>=candidates.length)return finish();
-      const img=new Image();
-      img.onload=()=>{
-        const decoded=img.decode?.();
-        if(decoded?.then)decoded.catch(()=>{}).finally(finish);
-        else finish();
-      };
-      img.onerror=next;
-      img.src=candidates[pos++];
-    };
-    const timer=setTimeout(finish,900);
-    next();
-  });
-}
-
 export default function App(){
   const [state,setState]=useState(makeInitialState);
   const [screen,setScreen]=useState("home");
