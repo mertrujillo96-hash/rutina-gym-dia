@@ -1,4 +1,5 @@
 import React,{useEffect,useMemo,useState} from "react";
+import {flushSync} from "react-dom";
 import {DAYS,STORAGE_KEY} from "./data/workouts";
 import ExerciseImage from "./components/ExerciseImage";
 import AnatomyCard from "./components/AnatomyCard";
@@ -26,6 +27,16 @@ function localImage(url,kind="detail"){
 export default function App(){
   const [state,setState]=useState(makeInitialState);
   const [screen,setScreen]=useState("home");
+  const transition=(action,direction="forward")=>{
+    const commit=()=>flushSync(action);
+    if(document.startViewTransition && !window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+      document.documentElement.dataset.nav=direction;
+      const vt=document.startViewTransition(commit);
+      vt.finished.finally(()=>delete document.documentElement.dataset.nav);
+    }else commit();
+  };
+  const navigate=(next,direction="forward")=>transition(()=>setScreen(next),direction);
+  const moveExercise=(next,direction)=>transition(()=>setState(s=>({...s,i:next,p:0})),direction);
   useEffect(()=>{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))},[state]);
 
   const day=state.day;
@@ -41,7 +52,7 @@ export default function App(){
 
   const update=(patch)=>setState(s=>({...s,...patch}));
   const switchDay=(d)=>setState(s=>({...s,day:d,i:0,p:0}));
-  const openExercise=(i)=>{setState(s=>({...s,i,p:0}));setScreen("detail")};
+  const openExercise=(i)=>{setState(s=>({...s,i,p:0}));navigate("detail","forward")};
 
   const toggleSet=(j)=>setState(s=>{
     const days={...s.days};
@@ -70,7 +81,7 @@ export default function App(){
   };
 
   return <>
-    <div className="app">
+    <div className="app"><main className="screenShell">
       {screen==="home" && <section>
         <div className="top"><div className="title"><h1>Rutina de Gym</h1><div className="dayText">Plan de entrenamiento</div></div><div className="badge">DISCIPLINA HOY · RESULTADOS MAÑANA</div></div>
         <div className="daySelector">
@@ -87,11 +98,11 @@ export default function App(){
             <span><span className="ename">{x.n}</span><span className="sub">{x.s}</span></span><span className="pill">4 × 15</span>
           </button>)}
         </div>
-        <button className="primary" onClick={()=>{update({i:0,p:0});setScreen("detail")}}>▶ Comenzar {DAYS[day].title}</button>
+        <button className="primary" onClick={()=>{update({i:0,p:0});navigate("detail","forward")}}>▶ Comenzar {DAYS[day].title}</button>
       </section>}
 
       {screen==="detail" && <section>
-        <div className="top"><button className="back" onClick={()=>setScreen("home")}>‹</button><div className="title"><h1 style={{fontSize:25}}>Rutina de Gym</h1><div className="dayText" style={{fontSize:19}}>{DAYS[day].title}</div></div><div className="badge">TÉCNICA PRIMERO</div></div>
+        <div className="top"><button className="back" onClick={()=>navigate("home","back")}>‹</button><div className="title"><h1 style={{fontSize:25}}>Rutina de Gym</h1><div className="dayText" style={{fontSize:19}}>{DAYS[day].title}</div></div><div className="badge">TÉCNICA PRIMERO</div></div>
         <div className="dhead"><div><div className="sub">Ejercicio {state.i+1} de {exercises.length}</div><h2>{exercise.n}</h2><div className="sub">{exercise.s}</div></div><div className="seriesBadge">4 × 15</div></div>
         {exercise.p.length>1 && <div className="tabs">{exercise.p.map((r,j)=><button key={r.l} className={"tab"+(j===state.p?" active":"")} onClick={()=>update({p:j})}>{r.l}</button>)}</div>}
         <ExerciseImage part={part} exercise={exercise} day={day} />
@@ -101,9 +112,9 @@ export default function App(){
         <div className="panel series"><h3>Series realizadas · <span className="sub">{count(state.i)}/4</span></h3><div className="srow">{state.days[day].sets[state.i].map((v,j)=><button key={j} className={"set"+(v?" done":"")} onClick={()=>toggleSet(j)}>{v?"✓ ":""}Serie {j+1}</button>)}</div></div>
         <textarea className="notes" maxLength="300" placeholder="Notas: peso usado, sensaciones, ajustes..." value={state.days[day].notes[state.i]||""} onChange={e=>setNote(e.target.value)} />
         <div className="nav">
-          <button disabled={state.i===0} onClick={()=>state.i>0&&update({i:state.i-1,p:0})}>← Anterior</button>
+          <button disabled={state.i===0} onClick={()=>state.i>0&&moveExercise(state.i-1,"back")}>← Anterior</button>
           <button onClick={complete}>{done(state.i)?"✓ Completado":"✓ Completar"}</button>
-          <button onClick={()=>{if(state.i<exercises.length-1)update({i:state.i+1,p:0});else setScreen("progress")}}>{state.i===exercises.length-1?"Finalizar":"Siguiente →"}</button>
+          <button onClick={()=>{if(state.i<exercises.length-1)moveExercise(state.i+1,"forward");else navigate("progress","forward")}}>{state.i===exercises.length-1?"Finalizar":"Siguiente →"}</button>
         </div>
       </section>}
 
@@ -114,12 +125,12 @@ export default function App(){
         <div className="panel" style={{marginTop:12}}><h3>Avance total</h3><div className="bar"><div className="fill" style={{width:pct()+"%"}}></div></div><p className="sub">{DAYS[day].title}: {pct()}% de las series completadas</p></div>
         <button className="reset" onClick={resetDay}>Reiniciar progreso del día seleccionado</button>
       </section>}
-    </div>
+    </main></div>
 
     <nav className="bottom"><div className="bottomin">
-      <button className={screen==="home"?"active":""} onClick={()=>setScreen("home")}>⌂<br/>Inicio</button>
-      <button className={screen==="detail"?"active":""} onClick={()=>setScreen("detail")}>🏋️<br/>Rutina</button>
-      <button className={screen==="progress"?"active":""} onClick={()=>setScreen("progress")}>▥<br/>Progreso</button>
+      <button className={screen==="home"?"active":""} onClick={()=>navigate("home","back")}>⌂<br/>Inicio</button>
+      <button className={screen==="detail"?"active":""} onClick={()=>navigate("detail","forward")}>🏋️<br/>Rutina</button>
+      <button className={screen==="progress"?"active":""} onClick={()=>navigate("progress","forward")}>▥<br/>Progreso</button>
     </div></nav>
   </>;
 }
