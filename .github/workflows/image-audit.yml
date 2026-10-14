@@ -1,0 +1,32 @@
+name: Audit exercise images
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - "tests/images.spec.js"
+      - ".github/workflows/image-audit.yml"
+      - "src/**"
+      - "assets/media-v2/**"
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - name: Include static assets
+        run: |
+          mkdir -p dist/assets
+          cp -r assets/. dist/assets/
+          cp manifest.webmanifest dist/manifest.webmanifest
+          cp sw.js dist/sw.js
+          cp .nojekyll dist/.nojekyll
+      - run: npx playwright test tests/images.spec.js --reporter=line
