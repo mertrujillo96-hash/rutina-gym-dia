@@ -417,7 +417,14 @@ export const IMAGE_MAP={
   }
 };
 
+const BASE_URL=(import.meta.env.BASE_URL||"/").replace(/\/?$/,"/");
+
+function localAsset(path){
+  if(!path||/^https?:\/\//i.test(path))return path;
+  return BASE_URL+path.replace(/^\.\//,"").replace(/^\//,"");
+}
+
 export function localImage(url,kind="detail"){
   const entry=IMAGE_MAP[url];
-  return entry?.[kind]||url;
+  return entry?.[kind]?localAsset(entry[kind]):url;
 }
