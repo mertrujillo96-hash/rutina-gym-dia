@@ -5,6 +5,7 @@ on:
     branches: ["main"]
     paths:
       - "tests/images.spec.js"
+      - "tests/app.spec.js"
       - "playwright.live.config.js"
       - ".github/workflows/image-audit.yml"
       - "src/**"
