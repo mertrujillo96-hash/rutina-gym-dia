@@ -11,6 +11,9 @@ test("flujo principal, persistencia y anatomías aprobadas", async ({page,reques
 
   const pressAsset=await request.get("http://127.0.0.1:4173/rutina-gym-dia/assets/anatomy/day1/press-plano-body.webp");
   expect(pressAsset.ok()).toBeTruthy();
+  expect(pressAsset.headers()["content-type"]||"").toContain("image/webp");
+  const pressBytes=await pressAsset.body();
+  expect(pressBytes.subarray(0,4).toString()).toBe("RIFF");
 
   await page.getByRole("button",{name:/Press plano/}).click();
   await expect(page.locator(".dhead h2")).toHaveText("Press plano");
@@ -45,6 +48,9 @@ test("flujo principal, persistencia y anatomías aprobadas", async ({page,reques
 test("Pec deck conserva anatomía local aprobada",async({page,request})=>{
   const asset=await request.get("http://127.0.0.1:4173/rutina-gym-dia/assets/pec-deck-anatomy-final.webp");
   expect(asset.ok()).toBeTruthy();
+  expect(asset.headers()["content-type"]||"").toContain("image/webp");
+  const bytes=await asset.body();
+  expect(bytes.subarray(0,4).toString()).toBe("RIFF");
 
   await page.goto("./");
   await page.getByRole("button",{name:/Pec deck/}).click();
