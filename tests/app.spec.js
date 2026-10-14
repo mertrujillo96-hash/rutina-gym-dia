@@ -54,7 +54,7 @@ test("Pec deck conserva anatomía local aprobada",async({page,request})=>{
 test("los cinco días son navegables",async({page})=>{
   await page.goto("./");
   for(let d=1;d<=5;d++){
-    await page.getByRole("button",{name:new RegExp("Día "+d)}).click();
+    await page.locator(".dayCard").filter({hasText:"Día "+d}).click();
     await expect(page.locator(".summary h2")).toHaveText("Día "+d);
     await expect(page.locator(".item").first()).toBeVisible();
   }
