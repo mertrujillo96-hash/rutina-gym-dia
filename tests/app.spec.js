@@ -65,3 +65,39 @@ test("los cinco días son navegables",async({page})=>{
     await expect(page.locator(".item").first()).toBeVisible();
   }
 });
+
+
+test("transiciones tipo WhatsApp nunca dejan la vista vacía",async({page})=>{
+  const errors=[];
+  page.on("pageerror",e=>errors.push(String(e)));
+  await page.goto("./");
+
+  const shell=page.locator(".screenShell");
+  await expect(shell).toBeVisible();
+  await expect(shell).not.toHaveClass(/slide-/);
+
+  await page.getByRole("button",{name:/Press plano/}).click();
+  await expect(page.locator(".screenShell")).toHaveClass(/slide-forward/);
+  await expect(page.locator(".dhead h2")).toHaveText("Press plano");
+  await page.waitForTimeout(280);
+  expect(await page.locator(".screenShell").evaluate(el=>getComputedStyle(el).opacity)).toBe("1");
+  expect((await page.locator(".screenShell").boundingBox())?.height||0).toBeGreaterThan(400);
+
+  await page.getByRole("button",{name:"Siguiente →"}).click();
+  await expect(page.locator(".screenShell")).toHaveClass(/slide-forward/);
+  await expect(page.locator(".dhead h2")).toHaveText("Curl barra");
+
+  await page.getByRole("button",{name:"← Anterior"}).click();
+  await expect(page.locator(".screenShell")).toHaveClass(/slide-back/);
+  await expect(page.locator(".dhead h2")).toHaveText("Press plano");
+
+  await page.getByRole("button",{name:"Inicio"}).click();
+  await expect(page.locator(".screenShell")).toHaveClass(/slide-back/);
+  await expect(page.getByRole("heading",{name:"Rutina de Gym"})).toBeVisible();
+
+  await page.getByRole("button",{name:"Progreso"}).click();
+  await expect(page.locator(".screenShell")).toHaveClass(/slide-forward/);
+  await expect(page.getByRole("heading",{name:"Progreso"})).toBeVisible();
+
+  expect(errors).toEqual([]);
+});
