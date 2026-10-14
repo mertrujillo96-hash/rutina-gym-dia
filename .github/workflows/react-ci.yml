@@ -3,6 +3,8 @@ on:
   push:
     branches: [react-transition-qa]
   workflow_dispatch:
+permissions:
+  contents: write
 concurrency:
   group: react-transition-qa-ci
   cancel-in-progress: true
@@ -25,6 +27,25 @@ jobs:
           cp sw.js dist/sw.js
           cp .nojekyll dist/.nojekyll
       - run: npm run test:e2e
+      - name: Prepare static React release branch
+        if: success()
+        run: |
+          set -e
+          rm -rf /tmp/react-release
+          mkdir -p /tmp/react-release
+          cp -a dist/. /tmp/react-release/
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch origin main
+          git checkout -B react-release-static origin/main
+          cp -a /tmp/react-release/. .
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Static release already up to date"
+          else
+            git commit -m "Preparar release React validado"
+          fi
+          git push --force origin HEAD:react-release-static
       - uses: actions/upload-artifact@v4
         if: always()
         with:
