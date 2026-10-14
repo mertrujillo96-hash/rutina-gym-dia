@@ -38,7 +38,10 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git fetch origin main
           git checkout -B react-release-static origin/main
+          git reset --hard origin/main
+          git clean -fdx
           cp -a /tmp/react-release/. .
+          rm -rf node_modules dist
           git add -A
           if git diff --cached --quiet; then
             echo "Static release already up to date"
