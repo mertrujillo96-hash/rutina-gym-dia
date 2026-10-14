@@ -21,6 +21,8 @@ jobs:
           node-version: 20
       - run: npm install --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
+      - name: Restore Vite entry
+        run: cp react-index.html index.html
       - run: npm run build
       - name: Include static assets
         run: |
