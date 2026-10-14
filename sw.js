@@ -1,5 +1,5 @@
-const C="rutina-gym-dia-react-v34";
-const SHELL=["./","./index.html","./manifest.webmanifest","./assets/pec-deck-anatomy-final.webp","./assets/anatomy/day1/press-plano-body.webp"];
+const C="rutina-gym-dia-react-v35";
+const SHELL=["./","./index.html","./manifest.webmanifest","./assets/pec-deck-anatomy-final.webp","./assets/anatomy/day1/press-plano-body.webp","./assets/anatomy/day1/curl-barra-anatomy-final.webp?v=20261014-final1"];
 
 self.addEventListener("install",e=>{
   self.skipWaiting();
