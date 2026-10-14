@@ -89,7 +89,7 @@ test("transiciones de vistas en móvil sin pantalla en blanco",async({page})=>{
 
 
 test("Curl barra usa la imagen anatómica generada del ejercicio 3 del día 1",async({page,request})=>{
-  const asset=await request.get("http://127.0.0.1:4173/rutina-gym-dia/assets/anatomy/day1/curl-barra-anatomy-generated.webp");
+  const asset=await request.get("http://127.0.0.1:4173/rutina-gym-dia/assets/anatomy/day1/curl-barra-anatomy-generated-v2.webp");
   expect(asset.ok()).toBeTruthy();
   expect(asset.headers()["content-type"]||"").toContain("image/webp");
   const bytes=await asset.body();
