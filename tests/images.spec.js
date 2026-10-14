@@ -1,4 +1,4 @@
-import {test,expect} from "@playwright/test";
+// Mobile cache validation v2\nimport {test,expect} from "@playwright/test";
 
 async function imageStatus(page){
   const img=page.locator(".hero img");
