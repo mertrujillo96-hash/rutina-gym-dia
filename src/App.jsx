@@ -26,7 +26,21 @@ function localImage(url,kind="detail"){
 export default function App(){
   const [state,setState]=useState(makeInitialState);
   const [screen,setScreen]=useState("home");
+  const [motion,setMotion]=useState({dir:"forward",seq:0});
   useEffect(()=>{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))},[state]);
+
+  const animate=(dir,change)=>{
+    setMotion(m=>({dir,seq:m.seq+1}));
+    change();
+  };
+  const navigate=(next,dir="forward")=>{
+    if(next===screen)return;
+    animate(dir,()=>setScreen(next));
+    window.scrollTo({top:0,behavior:"auto"});
+  };
+  const screenOrder={home:0,detail:1,progress:2};
+  const goTo=(next)=>navigate(next,(screenOrder[next]??0)>(screenOrder[screen]??0)?"forward":"back");
+  const motionUpdate=(patch,dir="forward")=>animate(dir,()=>setState(s=>({...s,...patch})));
 
   const day=state.day;
   const exercises=DAYS[day].ex;
@@ -41,7 +55,7 @@ export default function App(){
 
   const update=(patch)=>setState(s=>({...s,...patch}));
   const switchDay=(d)=>setState(s=>({...s,day:d,i:0,p:0}));
-  const openExercise=(i)=>{setState(s=>({...s,i,p:0}));setScreen("detail")};
+  const openExercise=(i)=>{setState(s=>({...s,i,p:0}));navigate("detail","forward")};
 
   const toggleSet=(j)=>setState(s=>{
     const days={...s.days};
@@ -71,6 +85,7 @@ export default function App(){
 
   return <>
     <div className="app">
+      <main key={screen+"-"+motion.seq} className={"screenShell"+(motion.seq?" slide-"+motion.dir:"")}>
       {screen==="home" && <section>
         <div className="top"><div className="title"><h1>Rutina de Gym</h1><div className="dayText">Plan de entrenamiento</div></div><div className="badge">DISCIPLINA HOY · RESULTADOS MAÑANA</div></div>
         <div className="daySelector">
@@ -87,11 +102,11 @@ export default function App(){
             <span><span className="ename">{x.n}</span><span className="sub">{x.s}</span></span><span className="pill">4 × 15</span>
           </button>)}
         </div>
-        <button className="primary" onClick={()=>{update({i:0,p:0});setScreen("detail")}}>▶ Comenzar {DAYS[day].title}</button>
+        <button className="primary" onClick={()=>{update({i:0,p:0});navigate("detail","forward")}}>▶ Comenzar {DAYS[day].title}</button>
       </section>}
 
       {screen==="detail" && <section>
-        <div className="top"><button className="back" onClick={()=>setScreen("home")}>‹</button><div className="title"><h1 style={{fontSize:25}}>Rutina de Gym</h1><div className="dayText" style={{fontSize:19}}>{DAYS[day].title}</div></div><div className="badge">TÉCNICA PRIMERO</div></div>
+        <div className="top"><button className="back" onClick={()=>navigate("home","back")}>‹</button><div className="title"><h1 style={{fontSize:25}}>Rutina de Gym</h1><div className="dayText" style={{fontSize:19}}>{DAYS[day].title}</div></div><div className="badge">TÉCNICA PRIMERO</div></div>
         <div className="dhead"><div><div className="sub">Ejercicio {state.i+1} de {exercises.length}</div><h2>{exercise.n}</h2><div className="sub">{exercise.s}</div></div><div className="seriesBadge">4 × 15</div></div>
         {exercise.p.length>1 && <div className="tabs">{exercise.p.map((r,j)=><button key={r.l} className={"tab"+(j===state.p?" active":"")} onClick={()=>update({p:j})}>{r.l}</button>)}</div>}
         <ExerciseImage part={part} exercise={exercise} day={day} />
@@ -101,9 +116,9 @@ export default function App(){
         <div className="panel series"><h3>Series realizadas · <span className="sub">{count(state.i)}/4</span></h3><div className="srow">{state.days[day].sets[state.i].map((v,j)=><button key={j} className={"set"+(v?" done":"")} onClick={()=>toggleSet(j)}>{v?"✓ ":""}Serie {j+1}</button>)}</div></div>
         <textarea className="notes" maxLength="300" placeholder="Notas: peso usado, sensaciones, ajustes..." value={state.days[day].notes[state.i]||""} onChange={e=>setNote(e.target.value)} />
         <div className="nav">
-          <button disabled={state.i===0} onClick={()=>state.i>0&&update({i:state.i-1,p:0})}>← Anterior</button>
+          <button disabled={state.i===0} onClick={()=>state.i>0&&motionUpdate({i:state.i-1,p:0},"back")}>← Anterior</button>
           <button onClick={complete}>{done(state.i)?"✓ Completado":"✓ Completar"}</button>
-          <button onClick={()=>{if(state.i<exercises.length-1)update({i:state.i+1,p:0});else setScreen("progress")}}>{state.i===exercises.length-1?"Finalizar":"Siguiente →"}</button>
+          <button onClick={()=>{if(state.i<exercises.length-1)motionUpdate({i:state.i+1,p:0},"forward");else navigate("progress","forward")}}>{state.i===exercises.length-1?"Finalizar":"Siguiente →"}</button>
         </div>
       </section>}
 
@@ -114,12 +129,13 @@ export default function App(){
         <div className="panel" style={{marginTop:12}}><h3>Avance total</h3><div className="bar"><div className="fill" style={{width:pct()+"%"}}></div></div><p className="sub">{DAYS[day].title}: {pct()}% de las series completadas</p></div>
         <button className="reset" onClick={resetDay}>Reiniciar progreso del día seleccionado</button>
       </section>}
+      </main>
     </div>
 
     <nav className="bottom"><div className="bottomin">
-      <button className={screen==="home"?"active":""} onClick={()=>setScreen("home")}>⌂<br/>Inicio</button>
-      <button className={screen==="detail"?"active":""} onClick={()=>setScreen("detail")}>🏋️<br/>Rutina</button>
-      <button className={screen==="progress"?"active":""} onClick={()=>setScreen("progress")}>▥<br/>Progreso</button>
+      <button className={screen==="home"?"active":""} onClick={()=>goTo("home")}>⌂<br/>Inicio</button>
+      <button className={screen==="detail"?"active":""} onClick={()=>goTo("detail")}>🏋️<br/>Rutina</button>
+      <button className={screen==="progress"?"active":""} onClick={()=>goTo("progress")}>▥<br/>Progreso</button>
     </div></nav>
   </>;
 }
