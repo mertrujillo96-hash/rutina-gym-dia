@@ -88,13 +88,17 @@ test("transiciones de vistas en móvil sin pantalla en blanco",async({page})=>{
 });
 
 
-test("Curl barra muestra la anatomía SVG local",async({page,request})=>{
-  const asset=await request.get("./assets/anatomy/day1/curl-barra-body.svg");
+test("Curl barra muestra la imagen final verificada",async({page,request})=>{
+  const asset=await request.get("./assets/anatomy/day1/curl-barra-anatomy-final.webp");
   expect(asset.ok()).toBeTruthy();
-  expect(await asset.text()).toContain("<svg");
+  expect(asset.headers()["content-type"]||"").toContain("image/webp");
+  const bytes=await asset.body();
+  expect(bytes.subarray(0,4).toString()).toBe("RIFF");
   await page.goto("./");
   await page.getByRole("button",{name:/Curl barra/}).click();
   const img=page.locator(".musclePanel img");
-  await expect(img).toHaveAttribute("src",/curl-barra-body\.svg/);
-  await expect.poll(()=>img.evaluate(el=>el.naturalWidth)).toBeGreaterThan(0);
+  await expect(img).toHaveAttribute("src",/curl-barra-anatomy-final\.webp/);
+  await expect(img).toBeVisible();
+  await expect.poll(()=>img.evaluate(el=>el.naturalWidth),{timeout:10000}).toBeGreaterThan(0);
+  await expect.poll(()=>img.evaluate(el=>el.naturalHeight),{timeout:10000}).toBeGreaterThan(0);
 });
