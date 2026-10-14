@@ -16,6 +16,18 @@ test("auditar todas las imágenes de ejercicios y miniaturas",async({page})=>{
   test.setTimeout(180000);
   const failures=[];
   await page.goto("./");
+  await page.evaluate(async()=>{
+    if("serviceWorker" in navigator){
+      await navigator.serviceWorker.ready;
+    }
+  });
+  await page.reload({waitUntil:"networkidle"});
+  if(await page.evaluate(()=>"serviceWorker" in navigator)){
+    await expect.poll(
+      ()=>page.evaluate(()=>Boolean(navigator.serviceWorker.controller)),
+      {timeout:10000}
+    ).toBe(true);
+  }
 
   for(let day=1;day<=5;day++){
     await page.locator(".dayCard").filter({hasText:"Día "+day}).click();
