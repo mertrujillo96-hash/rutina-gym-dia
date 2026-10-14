@@ -1,4 +1,4 @@
-const C="rutina-gym-dia-react-v33";
+const C="rutina-gym-dia-react-v34";
 const SHELL=["./","./index.html","./manifest.webmanifest","./assets/pec-deck-anatomy-final.webp","./assets/anatomy/day1/press-plano-body.webp"];
 
 self.addEventListener("install",e=>{
@@ -34,12 +34,14 @@ self.addEventListener("fetch",e=>{
   if(req.destination==="image"&&u.origin===self.location.origin){
     e.respondWith(
       caches.open(C).then(async cache=>{
+        const cached=await cache.match(req);
+        if(cached)return cached;
         try{
           const fresh=await fetch(req,{cache:"no-cache"});
           if(fresh&&fresh.ok)await cache.put(req,fresh.clone());
           return fresh;
         }catch(_){
-          return (await cache.match(req))||Response.error();
+          return Response.error();
         }
       })
     );
