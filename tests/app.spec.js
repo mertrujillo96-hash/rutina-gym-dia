@@ -49,9 +49,9 @@ test("flujo principal, persistencia y anatomías aprobadas", async ({page,reques
 test("Pec deck conserva anatomía local aprobada",async({page,request})=>{
   const asset=await request.get("http://127.0.0.1:4173/rutina-gym-dia/assets/pec-deck-anatomy-final.webp");
   expect(asset.ok()).toBeTruthy();
-  expect(asset.headers()["content-type"]||"").toContain("image/webp");
-  const bytes=await asset.body();
-  expect(bytes.subarray(0,4).toString()).toBe("RIFF");
+  expect(asset.headers()["content-type"]||"").toContain("image/svg+xml");
+  const body=await asset.text();
+  expect(body).toContain("BÍCEPS BRAQUIAL");
 
   await page.goto("./");
   await page.getByRole("button",{name:/Pec deck/}).click();
@@ -89,7 +89,7 @@ test("transiciones de vistas en móvil sin pantalla en blanco",async({page})=>{
 
 
 test("Curl barra usa la anatomía corporal asignada al ejercicio 3 del día 1",async({page,request})=>{
-  const asset=await request.get("http://127.0.0.1:4173/rutina-gym-dia/assets/anatomy/day1/curl-barra-body.webp");
+  const asset=await request.get("http://127.0.0.1:4173/rutina-gym-dia/assets/anatomy/day1/curl-barra-body.svg");
   expect(asset.ok()).toBeTruthy();
   expect(asset.headers()["content-type"]||"").toContain("image/webp");
   const bytes=await asset.body();
@@ -98,6 +98,6 @@ test("Curl barra usa la anatomía corporal asignada al ejercicio 3 del día 1",a
   await page.goto("./");
   await page.getByRole("button",{name:/Curl barra/}).click();
   await expect(page.locator(".dhead h2")).toHaveText("Curl barra");
-  await expect(page.locator(".musclePanel img")).toHaveAttribute("src",/curl-barra-body\.webp/);
+  await expect(page.locator(".musclePanel img")).toHaveAttribute("src",/curl-barra-body\.svg/);
   await expect(page.locator(".muscleLine").first()).toContainText("Bíceps");
 });
