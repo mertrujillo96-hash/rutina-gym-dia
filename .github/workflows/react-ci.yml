@@ -1,10 +1,10 @@
 name: React migration CI
 on:
   push:
-    branches: [react-migration]
+    branches: [react-transition-qa]
   workflow_dispatch:
 concurrency:
-  group: react-migration-ci
+  group: react-transition-qa-ci
   cancel-in-progress: true
 jobs:
   qa:
