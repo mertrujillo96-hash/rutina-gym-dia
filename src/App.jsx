@@ -1,5 +1,4 @@
 import React,{useEffect,useMemo,useState} from "react";
-import {flushSync} from "react-dom";
 import {DAYS,STORAGE_KEY} from "./data/workouts";
 import ExerciseImage from "./components/ExerciseImage";
 import AnatomyCard from "./components/AnatomyCard";
@@ -24,25 +23,66 @@ function localImage(url,kind="detail"){
   return m?.[kind]||url;
 }
 
+function preloadExerciseImage(exercise,partIndex=0){
+  const part=exercise?.p?.[partIndex]||exercise?.p?.[0];
+  if(!part)return Promise.resolve();
+  const candidates=[
+    localImage(part.img,"detail"),
+    part.img,
+    part.altImg?localImage(part.altImg,"detail"):null,
+    part.altImg
+  ].filter((v,i,a)=>v&&a.indexOf(v)===i);
+  return new Promise(resolve=>{
+    let done=false,pos=0;
+    const finish=()=>{if(done)return;done=true;clearTimeout(timer);resolve()};
+    const next=()=>{
+      if(done||pos>=candidates.length)return finish();
+      const img=new Image();
+      img.onload=()=>{
+        const decoded=img.decode?.();
+        if(decoded?.then)decoded.catch(()=>{}).finally(finish);
+        else finish();
+      };
+      img.onerror=next;
+      img.src=candidates[pos++];
+    };
+    const timer=setTimeout(finish,900);
+    next();
+  });
+}
+
 export default function App(){
   const [state,setState]=useState(makeInitialState);
   const [screen,setScreen]=useState("home");
-  const transition=(action,direction="forward")=>{
-    const commit=()=>flushSync(action);
-    if(document.startViewTransition && !window.matchMedia("(prefers-reduced-motion: reduce)").matches){
-      document.documentElement.dataset.nav=direction;
-      const vt=document.startViewTransition(commit);
-      vt.finished.finally(()=>delete document.documentElement.dataset.nav);
-    }else commit();
+  const [motion,setMotion]=useState({direction:"",key:0});
+  const runTransition=(action,direction="forward")=>{
+    setMotion(m=>({direction,key:m.key+1}));
+    action();
   };
-  const navigate=(next,direction="forward")=>transition(()=>setScreen(next),direction);
-  const moveExercise=(next,direction)=>transition(()=>setState(s=>({...s,i:next,p:0})),direction);
   useEffect(()=>{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))},[state]);
 
   const day=state.day;
   const exercises=DAYS[day].ex;
   const exercise=exercises[state.i]||exercises[0];
   const part=exercise.p[Math.min(state.p,exercise.p.length-1)];
+
+  const navigate=(next,direction="forward")=>runTransition(()=>setScreen(next),direction);
+  const openExercise=async(i)=>{
+    const target=exercises[i];
+    await preloadExerciseImage(target,0);
+    runTransition(()=>{
+      setState(s=>({...s,i,p:0}));
+      setScreen("detail");
+    },"forward");
+  };
+  const openCurrentDetail=async()=>{
+    await preloadExerciseImage(exercise,state.p);
+    navigate("detail","forward");
+  };
+  const moveExercise=async(next,direction)=>{
+    await preloadExerciseImage(exercises[next],0);
+    runTransition(()=>setState(s=>({...s,i:next,p:0})),direction);
+  };
 
   const count=(i,d=day)=>state.days[d].sets[i].filter(Boolean).length;
   const done=(i,d=day)=>count(i,d)===4;
@@ -52,7 +92,6 @@ export default function App(){
 
   const update=(patch)=>setState(s=>({...s,...patch}));
   const switchDay=(d)=>setState(s=>({...s,day:d,i:0,p:0}));
-  const openExercise=(i)=>{setState(s=>({...s,i,p:0}));navigate("detail","forward")};
 
   const toggleSet=(j)=>setState(s=>{
     const days={...s.days};
@@ -81,7 +120,7 @@ export default function App(){
   };
 
   return <>
-    <div className="app"><main className="screenShell">
+    <div className="app"><main key={motion.key} className={"screenShell "+(motion.direction?"slide-"+motion.direction:"")}>
       {screen==="home" && <section>
         <div className="top"><div className="title"><h1>Rutina de Gym</h1><div className="dayText">Plan de entrenamiento</div></div><div className="badge">DISCIPLINA HOY · RESULTADOS MAÑANA</div></div>
         <div className="daySelector">
@@ -98,7 +137,7 @@ export default function App(){
             <span><span className="ename">{x.n}</span><span className="sub">{x.s}</span></span><span className="pill">4 × 15</span>
           </button>)}
         </div>
-        <button className="primary" onClick={()=>{update({i:0,p:0});navigate("detail","forward")}}>▶ Comenzar {DAYS[day].title}</button>
+        <button className="primary" onClick={()=>openExercise(0)}>▶ Comenzar {DAYS[day].title}</button>
       </section>}
 
       {screen==="detail" && <section>
@@ -129,7 +168,7 @@ export default function App(){
 
     <nav className="bottom"><div className="bottomin">
       <button className={screen==="home"?"active":""} onClick={()=>navigate("home","back")}>⌂<br/>Inicio</button>
-      <button className={screen==="detail"?"active":""} onClick={()=>navigate("detail","forward")}>🏋️<br/>Rutina</button>
+      <button className={screen==="detail"?"active":""} onClick={openCurrentDetail}>🏋️<br/>Rutina</button>
       <button className={screen==="progress"?"active":""} onClick={()=>navigate("progress","forward")}>▥<br/>Progreso</button>
     </div></nav>
   </>;
