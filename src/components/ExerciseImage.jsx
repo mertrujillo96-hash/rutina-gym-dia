@@ -19,6 +19,7 @@ export default function ExerciseImage({part,exercise,day}){
 
   const [index,setIndex]=useState(0);
   const [ready,setReady]=useState(false);
+  const imgRef=useRef(null);
 
   useEffect(()=>{
     setIndex(0);
@@ -38,6 +39,7 @@ export default function ExerciseImage({part,exercise,day}){
 
   return <div className={"hero "+(ready?"imgReady":"imgLoading")}>
     <img
+      ref={imgRef}
       key={candidates[index]}
       src={candidates[index]}
       alt={part.l}
