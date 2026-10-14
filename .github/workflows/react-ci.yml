@@ -4,7 +4,7 @@ on:
     branches: [react-migration]
   workflow_dispatch:
 jobs:
-  build:
+  qa:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -12,6 +12,7 @@ jobs:
         with:
           node-version: 20
       - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
       - run: npm run build
       - name: Include existing static assets in production artifact
         run: |
@@ -19,7 +20,13 @@ jobs:
           cp manifest.webmanifest dist/manifest.webmanifest
           cp sw.js dist/sw.js
           cp .nojekyll dist/.nojekyll
+      - run: npm run test:e2e
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: react-build
-          path: dist
+          name: react-build-and-qa
+          path: |
+            dist
+            playwright-report
+            test-results
+          if-no-files-found: ignore
