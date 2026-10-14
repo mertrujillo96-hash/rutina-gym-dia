@@ -15,3 +15,32 @@
 
 #root{min-height:100vh}
 button{cursor:pointer}
+
+
+/* Transición segura tipo WhatsApp: solo anima la vista entrante */
+html,body,#root{overflow-x:hidden}
+.screenShell{min-height:calc(100vh - 110px);will-change:transform,opacity}
+.screenShell.slide-forward{animation:wa-enter-right 220ms cubic-bezier(.22,.75,.25,1) both}
+.screenShell.slide-back{animation:wa-enter-left 220ms cubic-bezier(.22,.75,.25,1) both}
+@keyframes wa-enter-right{
+  from{transform:translate3d(18%,0,0);opacity:.72}
+  to{transform:translate3d(0,0,0);opacity:1}
+}
+@keyframes wa-enter-left{
+  from{transform:translate3d(-12%,0,0);opacity:.78}
+  to{transform:translate3d(0,0,0);opacity:1}
+}
+.bottom{z-index:20}
+.bottom button,.item,.dayCard,.pday,.tab,.set,.nav button,.back,.primary{
+  -webkit-tap-highlight-color:transparent;
+}
+.bottom button{transition:color .16s ease,transform .14s ease}
+.bottom button:active{transform:scale(.96)}
+.item,.dayCard,.pday,.tab,.set,.nav button,.back,.primary{
+  transition:transform .14s ease,border-color .16s ease,box-shadow .16s ease,background-color .16s ease
+}
+.item:active,.dayCard:active,.pday:active,.tab:active,.set:active,.nav button:active,.back:active,.primary:active{transform:scale(.985)}
+@media(prefers-reduced-motion:reduce){
+  .screenShell.slide-forward,.screenShell.slide-back{animation:none!important}
+  .bottom button,.item,.dayCard,.pday,.tab,.set,.nav button,.back,.primary{transition:none!important}
+}
