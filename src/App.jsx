@@ -1,4 +1,4 @@
-import React,{useEffect,useMemo,useState} from "react";
+import React,{useEffect,useRef,useState} from "react";
 import {DAYS,STORAGE_KEY} from "./data/workouts";
 import {localImage} from "./data/imageMap";
 import ExerciseImage from "./components/ExerciseImage";
@@ -43,11 +43,32 @@ function makeInitialState(){
 export default function App(){
   const [state,setState]=useState(makeInitialState);
   const [screen,setScreen]=useState("home");
-  const [motion,setMotion]=useState({direction:"",key:0});
+  const [motion,setMotion]=useState({direction:"",phase:"idle",key:0});
+  const transitionRef=useRef({busy:false,exitTimer:0,enterTimer:0});
+
   const runTransition=(action,direction="forward")=>{
-    setMotion(m=>({direction,key:m.key+1}));
-    action();
+    if(transitionRef.current.busy)return false;
+    transitionRef.current.busy=true;
+    setMotion(m=>({...m,direction,phase:"exit"}));
+
+    transitionRef.current.exitTimer=window.setTimeout(()=>{
+      action();
+      setMotion(m=>({direction,phase:"enter",key:m.key+1}));
+
+      transitionRef.current.enterTimer=window.setTimeout(()=>{
+        setMotion(m=>({...m,direction:"",phase:"idle"}));
+        transitionRef.current.busy=false;
+      },190);
+    },95);
+
+    return true;
   };
+
+  useEffect(()=>()=>{
+    window.clearTimeout(transitionRef.current.exitTimer);
+    window.clearTimeout(transitionRef.current.enterTimer);
+  },[]);
+
   useEffect(()=>{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))},[state]);
 
   const day=state.day;
@@ -55,7 +76,12 @@ export default function App(){
   const exercise=exercises[state.i]||exercises[0];
   const part=exercise.p[Math.min(state.p,exercise.p.length-1)];
 
-  const navigate=(next,direction="forward")=>runTransition(()=>setScreen(next),direction);
+  const screenOrder={home:0,detail:1,progress:2};
+  const navigate=(next,direction)=>{
+    if(next===screen)return;
+    const resolvedDirection=direction||(screenOrder[next]>=screenOrder[screen]?"forward":"back");
+    runTransition(()=>setScreen(next),resolvedDirection);
+  };
   const openExercise=async(i)=>{
     const target=exercises[i];
     await preloadExerciseImage(target,0);
@@ -66,7 +92,7 @@ export default function App(){
   };
   const openCurrentDetail=async()=>{
     await preloadExerciseImage(exercise,state.p);
-    navigate("detail","forward");
+    navigate("detail");
   };
   const moveExercise=async(next,direction)=>{
     await preloadExerciseImage(exercises[next],0);
@@ -109,7 +135,7 @@ export default function App(){
   };
 
   return <>
-    <div className="app"><main key={motion.key} className={"screenShell "+(motion.direction?"slide-"+motion.direction:"")}>
+    <div className="app"><main key={motion.key} className={"screenShell motion-"+motion.phase+(motion.direction?" slide-"+motion.direction:"")}>
       {screen==="home" && <section>
         <div className="top"><div className="title"><h1>Rutina de Gym</h1><div className="dayText">Plan de entrenamiento</div></div><div className="badge">DISCIPLINA HOY · RESULTADOS MAÑANA</div></div>
         <div className="daySelector">
@@ -171,9 +197,9 @@ export default function App(){
     </main></div>
 
     <nav className="bottom"><div className="bottomin">
-      <button className={screen==="home"?"active":""} onClick={()=>navigate("home","back")}>⌂<br/>Inicio</button>
+      <button className={screen==="home"?"active":""} onClick={()=>navigate("home")}>⌂<br/>Inicio</button>
       <button className={screen==="detail"?"active":""} onClick={openCurrentDetail}>🏋️<br/>Rutina</button>
-      <button className={screen==="progress"?"active":""} onClick={()=>navigate("progress","forward")}>▥<br/>Progreso</button>
+      <button className={screen==="progress"?"active":""} onClick={()=>navigate("progress")}>▥<br/>Progreso</button>
     </div></nav>
   </>;
 }
