@@ -56,7 +56,7 @@ export default function AnatomyCard({day,exercise,part}){
   }else if(isCurlBarra){
     cardClass+=" day1BodyCard";
     stageClass+=" exactCrop";
-    special=<AssetImage src={base+"assets/anatomy/day1/curl-barra-body.webp"} alt="Anatomía muscular del Curl barra" />;
+    special=<AssetImage src={base+"assets/anatomy/day1/curl-barra-body.svg"} alt="Anatomía muscular del Curl barra" />;
   }
 
   return <div className={cardClass}>
