@@ -20,19 +20,26 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Sync latest source
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
       - run: npm install --no-audit --no-fund
       - run: npm run build
       - name: Publish compiled bundle into repository root
         run: |
+          set -e
+          cp -r dist /tmp/react-dist
+          git fetch origin main
+          git reset --hard origin/main
           rm -f assets/index-*.js assets/index-*.css assets/manifest-*.webmanifest
-          cp dist/index.html index.html
+          cp /tmp/react-dist/index.html index.html
           mkdir -p assets
-          cp -r dist/assets/. assets/
+          cp -r /tmp/react-dist/assets/. assets/
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html assets
           if ! git diff --cached --quiet; then
             git commit -m 'Compilar transición React validada'
-            git pull --rebase origin main
             git push origin HEAD:main
           fi
