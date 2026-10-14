@@ -15,6 +15,10 @@ async function imageStatus(page){
 test("auditar todas las imágenes de ejercicios y miniaturas",async({page})=>{
   test.setTimeout(180000);
   const failures=[];
+  const pageErrors=[];
+  const consoleErrors=[];
+  page.on("pageerror",err=>pageErrors.push(err.stack||err.message));
+  page.on("console",msg=>{if(msg.type()==="error")consoleErrors.push(msg.text())});
   await page.goto("./");
   await page.evaluate(async()=>{
     if("serviceWorker" in navigator){
@@ -50,7 +54,15 @@ test("auditar todas las imágenes de ejercicios y miniaturas",async({page})=>{
       const currentItems=page.locator(".item");
       const name=(await currentItems.nth(i).locator(".ename").textContent())?.trim()||("Ejercicio "+(i+1));
       await currentItems.nth(i).click();
-      await expect(page.locator(".dhead h2")).toHaveText(name);
+      try{
+        await expect(page.locator(".dhead h2")).toHaveText(name,{timeout:10000});
+      }catch(err){
+        console.log("OPEN_DETAIL_PAGE_ERRORS="+JSON.stringify(pageErrors));
+        console.log("OPEN_DETAIL_CONSOLE_ERRORS="+JSON.stringify(consoleErrors));
+        console.log("OPEN_DETAIL_URL="+page.url());
+        console.log("OPEN_DETAIL_BODY="+JSON.stringify((await page.locator("body").innerText()).slice(0,2500)));
+        throw err;
+      }
 
       const tabs=page.locator(".tab");
       const tabCount=await tabs.count();
