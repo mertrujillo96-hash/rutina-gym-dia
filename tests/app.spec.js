@@ -88,16 +88,17 @@ test("transiciones de vistas en móvil sin pantalla en blanco",async({page})=>{
 });
 
 
-test("Curl barra usa la anatomía corporal asignada al ejercicio 3 del día 1",async({page,request})=>{
-  const asset=await request.get("http://127.0.0.1:4173/rutina-gym-dia/assets/anatomy/day1/curl-barra-body.svg");
+test("Curl barra usa la imagen anatómica generada del ejercicio 3 del día 1",async({page,request})=>{
+  const asset=await request.get("http://127.0.0.1:4173/rutina-gym-dia/assets/anatomy/day1/curl-barra-anatomy-generated.webp");
   expect(asset.ok()).toBeTruthy();
-  expect(asset.headers()["content-type"]||"").toContain("image/svg+xml");
-  const body=await asset.text();
-  expect(body).toContain("BÍCEPS BRAQUIAL");
+  expect(asset.headers()["content-type"]||"").toContain("image/webp");
+  const bytes=await asset.body();
+  expect(bytes.subarray(0,4).toString()).toBe("RIFF");
 
   await page.goto("./");
   await page.getByRole("button",{name:/Curl barra/}).click();
   await expect(page.locator(".dhead h2")).toHaveText("Curl barra");
-  await expect(page.locator(".musclePanel img")).toHaveAttribute("src",/curl-barra-body\.svg/);
+  await expect(page.locator(".musclePanel img")).toHaveAttribute("src",/curl-barra-anatomy-generated\.webp/);
+  await expect(page.locator(".musclePanel img")).toBeVisible();
   await expect(page.locator(".muscleLine").first()).toContainText("Bíceps");
 });
