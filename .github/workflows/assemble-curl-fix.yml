@@ -40,5 +40,6 @@ jobs:
           git add assets/anatomy/day1/curl-barra-anatomy-final.webp .tmp/curlfix
           if ! git diff --cached --quiet; then
             git commit -m 'Publicar anatomía exacta de Curl barra'
+            git pull --rebase origin main
             git push origin HEAD:main
           fi
