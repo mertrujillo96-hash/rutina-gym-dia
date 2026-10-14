@@ -86,3 +86,18 @@ test("transiciones de vistas en móvil sin pantalla en blanco",async({page})=>{
   await expect(page.locator(".dayCard")).toHaveCount(5);
   expect(errors).toEqual([]);
 });
+
+
+test("Curl barra usa la anatomía corporal asignada al ejercicio 3 del día 1",async({page,request})=>{
+  const asset=await request.get("http://127.0.0.1:4173/rutina-gym-dia/assets/anatomy/day1/curl-barra-body.webp");
+  expect(asset.ok()).toBeTruthy();
+  expect(asset.headers()["content-type"]||"").toContain("image/webp");
+  const bytes=await asset.body();
+  expect(bytes.subarray(0,4).toString()).toBe("RIFF");
+
+  await page.goto("./");
+  await page.getByRole("button",{name:/Curl barra/}).click();
+  await expect(page.locator(".dhead h2")).toHaveText("Curl barra");
+  await expect(page.locator(".musclePanel img")).toHaveAttribute("src",/curl-barra-body\.webp/);
+  await expect(page.locator(".muscleLine").first()).toContainText("Bíceps");
+});
