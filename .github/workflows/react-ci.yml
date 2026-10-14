@@ -16,7 +16,8 @@ jobs:
       - run: npm run build
       - name: Include existing static assets in production artifact
         run: |
-          cp -r assets dist/assets
+          mkdir -p dist/assets
+          cp -r assets/. dist/assets/
           cp manifest.webmanifest dist/manifest.webmanifest
           cp sw.js dist/sw.js
           cp .nojekyll dist/.nojekyll
