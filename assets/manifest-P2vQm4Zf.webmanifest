@@ -1,0 +1,9 @@
+{
+  "name":"Rutina Gym",
+  "short_name":"Rutina Gym",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#07110d",
+  "theme_color":"#07110d",
+  "icons":[]
+}
