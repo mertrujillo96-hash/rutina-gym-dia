@@ -26,7 +26,8 @@ jobs:
           import requests
           from PIL import Image, ImageOps
 
-          html=Path('index.html').read_text(encoding='utf-8')
+          source=Path('src/data/workouts.js')
+          html=source.read_text(encoding='utf-8')
           urls=[]
           for u in re.findall(r'(?:img|altImg):"([^"]+)"', html):
               if u.startswith('http') and u not in urls:
@@ -99,13 +100,23 @@ jobs:
           (out/'report.json').write_text(json.dumps({
               'referenced':len(urls),'localized':len(manifest),'failed':failures
           },ensure_ascii=False,indent=2),encoding='utf-8')
+
+          image_module=(
+              '// Generado automáticamente por localize-images.yml.\n'
+              'export const IMAGE_MAP='+json.dumps(manifest,ensure_ascii=False,indent=2)+';\n\n'
+              'export function localImage(url,kind="detail"){\n'
+              '  const entry=IMAGE_MAP[url];\n'
+              '  return entry?.[kind]||url;\n'
+              '}\n'
+          )
+          Path('src/data/imageMap.js').write_text(image_module,encoding='utf-8')
           print(json.dumps({'referenced':len(urls),'localized':len(manifest),'failed':len(failures)},indent=2))
           PY
       - name: Commit optimized assets
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add assets/media-v2
+          git add assets/media-v2 src/data/imageMap.js
           if ! git diff --cached --quiet; then
             git commit -m 'Optimizar y alojar imágenes localmente'
             git pull --rebase origin main
