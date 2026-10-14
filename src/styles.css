@@ -17,18 +17,46 @@
 button{cursor:pointer}
 
 
-/* Transición natural sin superposición */
+/* Transición secuencial: una sola vista montada, sin superposición */
 html,body,#root{overflow-x:hidden}
-.screenShell{min-height:calc(100vh - 110px);will-change:transform,opacity}
-.screenShell.slide-forward{animation:wa-enter-right .20s cubic-bezier(.22,.75,.25,1) both}
-.screenShell.slide-back{animation:wa-enter-left .20s cubic-bezier(.22,.75,.25,1) both}
-@keyframes wa-enter-right{from{transform:translate3d(8%,0,0);opacity:.82}to{transform:translate3d(0,0,0);opacity:1}}
-@keyframes wa-enter-left{from{transform:translate3d(-6%,0,0);opacity:.84}to{transform:translate3d(0,0,0);opacity:1}}
+.screenShell{
+  min-height:calc(100vh - 110px);
+  transform:translate3d(0,0,0);
+  backface-visibility:hidden;
+  transform-origin:center top;
+}
+.screenShell.motion-exit{pointer-events:none}
+.screenShell.motion-exit.slide-forward{animation:screen-exit-forward 95ms cubic-bezier(.4,0,1,1) both}
+.screenShell.motion-exit.slide-back{animation:screen-exit-back 95ms cubic-bezier(.4,0,1,1) both}
+.screenShell.motion-enter.slide-forward{animation:screen-enter-forward 190ms cubic-bezier(.16,1,.3,1) both}
+.screenShell.motion-enter.slide-back{animation:screen-enter-back 190ms cubic-bezier(.16,1,.3,1) both}
+
+@keyframes screen-exit-forward{
+  from{transform:translate3d(0,0,0);opacity:1}
+  to{transform:translate3d(-2.5%,0,0);opacity:.94}
+}
+@keyframes screen-exit-back{
+  from{transform:translate3d(0,0,0);opacity:1}
+  to{transform:translate3d(2.5%,0,0);opacity:.94}
+}
+@keyframes screen-enter-forward{
+  from{transform:translate3d(5%,0,0);opacity:.96}
+  to{transform:translate3d(0,0,0);opacity:1}
+}
+@keyframes screen-enter-back{
+  from{transform:translate3d(-5%,0,0);opacity:.96}
+  to{transform:translate3d(0,0,0);opacity:1}
+}
+
 .hero img{transition:opacity .14s ease}
 .hero.imgLoading img{opacity:0}
 .hero.imgReady img{opacity:1}
 .screenShell .imgLoading:after{display:none!important}
+
 @media(prefers-reduced-motion:reduce){
-  .screenShell.slide-forward,.screenShell.slide-back{animation:none!important}
+  .screenShell.motion-exit.slide-forward,
+  .screenShell.motion-exit.slide-back,
+  .screenShell.motion-enter.slide-forward,
+  .screenShell.motion-enter.slide-back{animation:none!important}
   .hero img{transition:none!important}
 }
