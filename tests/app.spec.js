@@ -40,6 +40,7 @@ test("flujo principal, persistencia y anatomías aprobadas", async ({page,reques
 
   await page.getByRole("button",{name:"Progreso"}).click();
   await expect(page.getByRole("heading",{name:"Progreso"})).toBeVisible();
+  await expect(page.locator(".screenShell")).toHaveCount(1);
   await expect(page.locator(".progressDays .pday")).toHaveCount(5);
 
   expect(errors).toEqual([]);
@@ -74,6 +75,7 @@ test("transiciones de vistas en móvil sin pantalla en blanco",async({page})=>{
   await expect(page.locator(".dayCard")).toHaveCount(5);
   await page.locator(".item").first().click();
   await expect(page.locator(".dhead h2")).toBeVisible();
+  await expect(page.locator(".screenShell")).toHaveCount(1);
   await page.getByRole("button",{name:"Siguiente →"}).click();
   await expect(page.locator(".dhead h2")).toBeVisible();
   await page.locator(".back").click();
