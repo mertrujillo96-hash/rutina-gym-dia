@@ -8,6 +8,8 @@ on:
       - ".github/workflows/image-audit.yml"
       - "src/**"
       - "assets/media-v2/**"
+      - "index.html"
+      - "sw.js"
 permissions:
   contents: read
 jobs:
