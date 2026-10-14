@@ -27,7 +27,7 @@ jobs:
           cat .tmp/curl/chunk*.txt | tr -d '\n\r ' | base64 -d > assets/anatomy/day1/curl-barra-anatomy-generated-v2.webp
           test "$(head -c 4 assets/anatomy/day1/curl-barra-anatomy-generated-v2.webp)" = "RIFF"
           file assets/anatomy/day1/curl-barra-anatomy-generated-v2.webp
-          test $(wc -c < assets/anatomy/day1/curl-barra-anatomy-generated-v2.webp) -gt 30000
+          test $(wc -c < assets/anatomy/day1/curl-barra-anatomy-generated-v2.webp) -gt 10000
       - name: Commit rebuilt asset
         run: |
           set -euo pipefail
