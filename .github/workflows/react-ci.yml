@@ -1,0 +1,25 @@
+name: React migration CI
+on:
+  push:
+    branches: [react-migration]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+      - name: Include existing static assets in production artifact
+        run: |
+          cp -r assets dist/assets
+          cp manifest.webmanifest dist/manifest.webmanifest
+          cp sw.js dist/sw.js
+          cp .nojekyll dist/.nojekyll
+      - uses: actions/upload-artifact@v4
+        with:
+          name: react-build
+          path: dist
