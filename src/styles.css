@@ -15,3 +15,15 @@
 
 #root{min-height:100vh}
 button{cursor:pointer}
+
+.screenShell{view-transition-name:screen-content;min-height:calc(100vh - 110px)}
+html,body,#root{overflow-x:hidden}
+html[data-nav="forward"]::view-transition-old(screen-content){animation:wa-out-left 170ms ease both}
+html[data-nav="forward"]::view-transition-new(screen-content){animation:wa-in-right 230ms cubic-bezier(.2,.75,.25,1) both}
+html[data-nav="back"]::view-transition-old(screen-content){animation:wa-out-right 170ms ease both}
+html[data-nav="back"]::view-transition-new(screen-content){animation:wa-in-left 230ms cubic-bezier(.2,.75,.25,1) both}
+@keyframes wa-in-right{from{transform:translateX(20%);opacity:.7}to{transform:translateX(0);opacity:1}}
+@keyframes wa-out-left{from{transform:translateX(0);opacity:1}to{transform:translateX(-8%);opacity:.8}}
+@keyframes wa-in-left{from{transform:translateX(-12%);opacity:.8}to{transform:translateX(0);opacity:1}}
+@keyframes wa-out-right{from{transform:translateX(0);opacity:1}to{transform:translateX(18%);opacity:.7}}
+@media(prefers-reduced-motion:reduce){::view-transition-old(screen-content),::view-transition-new(screen-content){animation:none!important}}
