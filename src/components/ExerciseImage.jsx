@@ -1,4 +1,4 @@
-import React,{useEffect,useMemo,useState} from "react";
+import React,{useEffect,useMemo,useRef,useState} from "react";
 import {DAY1_FALLBACKS} from "../data/workouts";
 import {localImage} from "../data/imageMap";
 
@@ -24,6 +24,13 @@ export default function ExerciseImage({part,exercise,day}){
     setIndex(0);
     setReady(false);
   },[part.img,part.altImg,exercise.n,day]);
+
+  useEffect(()=>{
+    const el=imgRef.current;
+    if(!el||!el.complete)return;
+    if(el.naturalWidth>0)setReady(true);
+    else if(index<candidates.length)setIndex(v=>v+1);
+  },[index,candidates]);
 
   if(index>=candidates.length){
     return <div className="hero"><div className="fallback" style={{display:"grid"}}>🏋️</div></div>;
