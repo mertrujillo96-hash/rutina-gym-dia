@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main"]
     paths:
-      - "tests/images.spec.js"
+      - "tests/images.spec.js"\n      - "playwright.live.config.js"
       - ".github/workflows/image-audit.yml"
       - "src/**"
       - "assets/media-v2/**"
