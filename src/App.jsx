@@ -122,7 +122,22 @@ export default function App(){
         <div className="list">
           {exercises.map((x,i)=><button key={x.n} className="item" onClick={()=>openExercise(i)}>
             <span className="num">{done(i)?"✓":i+1}</span>
-            <span className="thumbWrap"><img className="thumb" src={localImage(x.p[0].img,"thumb")} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" width="82" height="60" onError={e=>{e.currentTarget.style.display="none"}} /></span>
+            <span className="thumbWrap"><img className="thumb" src={localImage(x.p[0].img,"thumb")} alt="" loading="eager" decoding="async" referrerPolicy="no-referrer" width="82" height="60" onError={e=>{
+              const img=e.currentTarget;
+              const original=x.p[0].img;
+              const detail=localImage(original,"detail");
+              if(img.dataset.fallback!=="detail"&&img.getAttribute("src")!==detail){
+                img.dataset.fallback="detail";
+                img.src=detail;
+                return;
+              }
+              if(img.dataset.fallback!=="remote"&&original!==detail){
+                img.dataset.fallback="remote";
+                img.src=original;
+                return;
+              }
+              img.style.display="none";
+            }} /></span>
             <span><span className="ename">{x.n}</span><span className="sub">{x.s}</span></span><span className="pill">4 × 15</span>
           </button>)}
         </div>
