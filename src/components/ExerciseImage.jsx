@@ -1,10 +1,6 @@
 import React,{useEffect,useMemo,useState} from "react";
 import {DAY1_FALLBACKS} from "../data/workouts";
-
-function localImage(url,kind="detail"){
-  const m=window.GYM_IMAGES?.[url];
-  return m?.[kind]||url;
-}
+import {localImage} from "../data/imageMap";
 
 export default function ExerciseImage({part,exercise,day}){
   const candidates=useMemo(()=>[
