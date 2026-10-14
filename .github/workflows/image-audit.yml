@@ -10,6 +10,8 @@ on:
       - "assets/media-v2/**"
       - "index.html"
       - "sw.js"
+      - "react-index.html"
+      - ".github/workflows/pages.yml"
 permissions:
   contents: read
 jobs:
