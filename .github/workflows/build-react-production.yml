@@ -1,0 +1,38 @@
+name: Build React production bundle
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "src/**"
+      - "package.json"
+      - "vite.config.js"
+      - ".github/workflows/build-react-production.yml"
+permissions:
+  contents: write
+concurrency:
+  group: react-production-build
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+      - name: Publish compiled bundle into repository root
+        run: |
+          rm -f assets/index-*.js assets/index-*.css assets/manifest-*.webmanifest
+          cp dist/index.html index.html
+          mkdir -p assets
+          cp -r dist/assets/. assets/
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets
+          if ! git diff --cached --quiet; then
+            git commit -m 'Compilar transición React validada'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
