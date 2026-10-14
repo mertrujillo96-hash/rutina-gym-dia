@@ -19,7 +19,7 @@ export const DAYS={
 {n:"Press militar agarre neutro",s:"Hombros y tríceps",p:[{l:"Press neutro",img:"https://cdn.theden.co.kr/news/photo/202407/2793_10603_2943.jpg",i:"Comienza con las mancuernas junto a los hombros y las palmas enfrentadas. Empuja hacia arriba y baja con control.",t:["Abdomen firme","Muñecas alineadas","Palmas enfrentadas"],e:["Arquear la espalda","Usar impulso","Bajar de golpe"]}]},
 {n:"Press hombro",s:"Deltoides y tríceps",p:[{l:"Press hombro",img:"https://image.slideserve.com/205662/shoulder-press-machine-l.jpg",i:"Siéntate estable con las mancuernas a la altura de los hombros. Empuja sobre la cabeza y baja lentamente.",t:["Pies firmes","Torso estable","Recorrido controlado"],e:["Arquear lumbar","Usar impulso","Forzar el rango"]}]},
 {n:"Trapecio mancuerna",s:"Trapecio superior",p:[{l:"Trapecio",img:"https://image.tuasaude.com/media/article/nq/yt/traps-exercises_46587.jpg?height=487&width=686",i:"Sostén las mancuernas a los lados y eleva los hombros verticalmente. Haz una pausa arriba y vuelve a bajar.",t:["Movimiento vertical","Brazos relajados","Pausa arriba"],e:["Hacer círculos","Doblar mucho los codos","Rebotar"]}]},
-{n:"Abdomen",s:"Elevación de piernas en silla romana",p:[{l:"Elevación de piernas",img:"https://images.squarespace-cdn.com/content/v1/587bc73ed482e9504a293c7b/1487715444812-768E0WBO06CC3UANDK7Y/image-asset.jpeg",altImg:"https://assets.bodyspec.com/master/static/b501878f0a7eb7caf80f9760e99b7d30/b4111/man_doing_hanging_leg_raise_variation_on_captains_chair..jpg",i:"Apoya la espalda y los antebrazos en la silla romana. Eleva las piernas al frente con el abdomen contraído y bájalas lentamente sin balancearte.",t:["Espalda apoyada","Abdomen contraído","Sube y baja con control"],e:["Balancear el cuerpo","Usar impulso","Dejar caer las piernas"]}]}
+{n:"Abdomen",s:"Elevación de piernas en silla romana",p:[{l:"Elevación de piernas",img:"https://images.squarespace-cdn.com/content/v1/587bc73ed482e9504a293c7b/1487715444812-768E0WBO06CC3UANDK7Y/image-asset.jpeg",i:"Apoya la espalda y los antebrazos en la silla romana. Eleva las piernas al frente con el abdomen contraído y bájalas lentamente sin balancearte.",t:["Espalda apoyada","Abdomen contraído","Sube y baja con control"],e:["Balancear el cuerpo","Usar impulso","Dejar caer las piernas"]}]}
 ]},
 3:{title:"Día 3",ex:[
 {n:"Press inclinado barra",s:"Pecho superior · barra",p:[{l:"Press inclinado",img:"https://cdn.shopify.com/s/files/1/1214/7132/files/mt-incline-barbell-benchpress-900x675_jpg.png?v=1707490142",i:"Acuéstate en un banco inclinado entre 30° y 45°, retrae las escápulas y apoya bien los pies. Baja la barra hacia la parte superior del pecho y empuja de nuevo con control.",t:["Escápulas apoyadas","Pies firmes","Barra hacia el pecho superior"],e:["Rebotar la barra","Abrir demasiado los codos","Despegar la cadera"]}]},
@@ -64,7 +64,5 @@ export const DAYS={
 export const STORAGE_KEY="rutinaGymMultiDia-v1";
 
 export const DAY1_FALLBACKS={
-  "Copa":"https://cdn.jsdelivr.net/npm/@bryllim/workout-guide@1.0.0/assets/dumbbell-overhead-tricep-extension/frame-2.svg",
-  "Curl supino antebrazo":"https://upload.wikimedia.org/wikipedia/commons/2/29/Exercise_Wrist_Curls.png",
-  "Abdomen":"https://assets.bodyspec.com/master/static/b501878f0a7eb7caf80f9760e99b7d30/b4111/man_doing_hanging_leg_raise_variation_on_captains_chair..jpg"
+  "Curl supino antebrazo":"https://upload.wikimedia.org/wikipedia/commons/2/29/Exercise_Wrist_Curls.png"
 };
