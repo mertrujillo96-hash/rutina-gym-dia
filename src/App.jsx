@@ -44,10 +44,14 @@ export default function App(){
   const [state,setState]=useState(makeInitialState);
   const [screen,setScreen]=useState("home");
   const [motion,setMotion]=useState({direction:"",phase:"idle",key:0});
-  const transitionRef=useRef({busy:false,exitTimer:0,enterTimer:0});
+  const transitionRef=useRef({busy:false,exitTimer:0,enterTimer:0,pending:null});
 
   const runTransition=(action,direction="forward")=>{
-    if(transitionRef.current.busy)return false;
+    if(transitionRef.current.busy){
+      transitionRef.current.pending={action,direction};
+      return false;
+    }
+
     transitionRef.current.busy=true;
     setMotion(m=>({...m,direction,phase:"exit"}));
 
@@ -56,8 +60,14 @@ export default function App(){
       setMotion(m=>({direction,phase:"enter",key:m.key+1}));
 
       transitionRef.current.enterTimer=window.setTimeout(()=>{
-        setMotion(m=>({...m,direction:"",phase:"idle"}));
+        const pending=transitionRef.current.pending;
+        transitionRef.current.pending=null;
         transitionRef.current.busy=false;
+        setMotion(m=>({...m,direction:"",phase:"idle"}));
+
+        if(pending){
+          window.requestAnimationFrame(()=>runTransition(pending.action,pending.direction));
+        }
       },190);
     },95);
 
