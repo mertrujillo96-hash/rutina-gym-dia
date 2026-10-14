@@ -99,6 +99,8 @@ test("Curl barra usa la imagen anatómica generada del ejercicio 3 del día 1",a
   await page.getByRole("button",{name:/Curl barra/}).click();
   await expect(page.locator(".dhead h2")).toHaveText("Curl barra");
   await expect(page.locator(".musclePanel img")).toHaveAttribute("src",/curl-barra-anatomy-generated\.webp/);
-  await expect(page.locator(".musclePanel img")).toBeVisible();
+  const anatomyImg=page.locator(".musclePanel img");
+  await expect(anatomyImg).toBeVisible();
+  await expect.poll(()=>anatomyImg.evaluate(el=>el.naturalWidth),{timeout:10000}).toBeGreaterThan(0);
   await expect(page.locator(".muscleLine").first()).toContainText("Bíceps");
 });
