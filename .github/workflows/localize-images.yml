@@ -1,10 +1,5 @@
 name: Localize and optimize images
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'index.html'
-      - '.github/workflows/localize-images.yml'
   workflow_dispatch:
 permissions:
   contents: write
