@@ -65,3 +65,22 @@ test("los cinco días son navegables",async({page})=>{
     await expect(page.locator(".item").first()).toBeVisible();
   }
 });
+
+test("transiciones de vistas en móvil sin pantalla en blanco",async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  const errors=[];
+  page.on("pageerror",e=>errors.push(String(e)));
+  await page.goto("./");
+  await expect(page.locator(".dayCard")).toHaveCount(5);
+  await page.locator(".item").first().click();
+  await expect(page.locator(".dhead h2")).toBeVisible();
+  await page.getByRole("button",{name:"Siguiente →"}).click();
+  await expect(page.locator(".dhead h2")).toBeVisible();
+  await page.locator(".back").click();
+  await expect(page.locator(".item").first()).toBeVisible();
+  await page.getByRole("button",{name:"Progreso"}).click();
+  await expect(page.getByRole("heading",{name:"Progreso"})).toBeVisible();
+  await page.getByRole("button",{name:"Inicio"}).click();
+  await expect(page.locator(".dayCard")).toHaveCount(5);
+  expect(errors).toEqual([]);
+});
