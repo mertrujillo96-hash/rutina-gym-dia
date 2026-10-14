@@ -8,5 +8,10 @@ createRoot(document.getElementById("root")).render(
 );
 
 if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>navigator.serviceWorker.register(import.meta.env.BASE_URL+"sw.js").catch(()=>{}));
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker
+      .register(import.meta.env.BASE_URL+"sw.js",{updateViaCache:"none"})
+      .then(reg=>reg.update())
+      .catch(()=>{});
+  });
 }
