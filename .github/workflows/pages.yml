@@ -45,3 +45,21 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Smoke test deployed React app
+        env:
+          SITE: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -e
+          curl -fL --retry 8 --retry-delay 3 "$SITE" -o /tmp/index.html
+          grep -q 'id="root"' /tmp/index.html
+          SCRIPT=$(grep -oE 'src="[^"]+\.js"' /tmp/index.html | head -1 | cut -d'"' -f2)
+          test -n "$SCRIPT"
+          case "$SCRIPT" in
+            http*) SCRIPT_URL="$SCRIPT" ;;
+            /*) BASE=$(printf '%s' "$SITE" | sed 's#/$##'); ORIGIN=$(printf '%s' "$BASE" | sed -E 's#(https?://[^/]+).*#\1#'); SCRIPT_URL="$ORIGIN$SCRIPT" ;;
+            *) SCRIPT_URL="$SITE$SCRIPT" ;;
+          esac
+          curl -fL --retry 5 "$SCRIPT_URL" -o /tmp/app.js
+          test $(wc -c < /tmp/app.js) -gt 50000
+          curl -fL --retry 5 "${SITE}assets/anatomy/day1/press-plano-body.webp" -o /tmp/press.webp
+          test "$(head -c 4 /tmp/press.webp)" = "RIFF"
