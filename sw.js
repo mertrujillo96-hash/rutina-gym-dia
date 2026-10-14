@@ -1,4 +1,4 @@
-const C="rutina-gym-dia-react-v31";
+const C="rutina-gym-dia-react-v32";
 const SHELL=["./","./index.html","./manifest.webmanifest","./assets/pec-deck-anatomy-final.webp","./assets/anatomy/day1/press-plano-body.webp"];
 self.addEventListener("install",e=>{
   self.skipWaiting();
@@ -17,6 +17,12 @@ self.addEventListener("fetch",e=>{
     e.respondWith(fetch(req,{cache:"no-store"}).then(r=>{
       const x=r.clone();caches.open(C).then(c=>c.put(req,x));return r;
     }).catch(()=>caches.match(req).then(r=>r||caches.match("./index.html"))));
+    return;
+  }
+  if(u.pathname.endsWith("/assets/media-v2/images.js")){
+    e.respondWith(fetch(req,{cache:"no-store"}).then(r=>{
+      const x=r.clone();caches.open(C).then(c=>c.put(req,x));return r;
+    }).catch(()=>caches.match(req)));
     return;
   }
   if(req.destination==="image"){
