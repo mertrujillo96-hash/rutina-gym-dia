@@ -49,9 +49,9 @@ test("flujo principal, persistencia y anatomías aprobadas", async ({page,reques
 test("Pec deck conserva anatomía local aprobada",async({page,request})=>{
   const asset=await request.get("http://127.0.0.1:4173/rutina-gym-dia/assets/pec-deck-anatomy-final.webp");
   expect(asset.ok()).toBeTruthy();
-  expect(asset.headers()["content-type"]||"").toContain("image/svg+xml");
-  const body=await asset.text();
-  expect(body).toContain("BÍCEPS BRAQUIAL");
+  expect(asset.headers()["content-type"]||"").toContain("image/webp");
+  const bytes=await asset.body();
+  expect(bytes.subarray(0,4).toString()).toBe("RIFF");
 
   await page.goto("./");
   await page.getByRole("button",{name:/Pec deck/}).click();
