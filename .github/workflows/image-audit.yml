@@ -32,3 +32,5 @@ jobs:
           cp sw.js dist/sw.js
           cp .nojekyll dist/.nojekyll
       - run: npx playwright test tests/images.spec.js --reporter=line
+      - name: Audit live GitHub Pages images
+        run: npx playwright test tests/images.spec.js --config=playwright.live.config.js --reporter=line
