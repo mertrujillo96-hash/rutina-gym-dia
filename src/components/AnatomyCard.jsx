@@ -40,6 +40,7 @@ export default function AnatomyCard({day,exercise,part}){
   const base=import.meta.env.BASE_URL;
   const isPec=exercise.n==="Pec deck";
   const isPress=exercise.n==="Press plano";
+  const isCurlBarra=exercise.n==="Curl barra";
   let cardClass="musclePanel";
   let stageClass="anatomyStage";
   let special=null;
@@ -52,6 +53,10 @@ export default function AnatomyCard({day,exercise,part}){
     cardClass+=" pressBodyCard";
     stageClass+=" exactCrop";
     special=<AssetImage src={base+"assets/anatomy/day1/press-plano-body.webp"} alt="Anatomía muscular del Press plano" />;
+  }else if(isCurlBarra){
+    cardClass+=" day1BodyCard";
+    stageClass+=" exactCrop";
+    special=<AssetImage src={base+"assets/anatomy/day1/curl-barra-body.webp"} alt="Anatomía muscular del Curl barra" />;
   }
 
   return <div className={cardClass}>
