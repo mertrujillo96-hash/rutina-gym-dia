@@ -4,6 +4,27 @@ import {localImage} from "./data/imageMap";
 import ExerciseImage from "./components/ExerciseImage";
 import AnatomyCard from "./components/AnatomyCard";
 
+function preloadUrl(src){
+  return new Promise(resolve=>{
+    if(!src){resolve();return}
+    const img=new Image();
+    let settled=false;
+    const finish=()=>{if(!settled){settled=true;resolve()}};
+    img.onload=finish;
+    img.onerror=finish;
+    img.decoding="async";
+    img.src=src;
+    if(img.complete&&img.naturalWidth>0)finish();
+    window.setTimeout(finish,2500);
+  });
+}
+
+function preloadExerciseImage(exercise,partIndex=0){
+  const part=exercise?.p?.[partIndex]||exercise?.p?.[0];
+  if(!part)return Promise.resolve();
+  return preloadUrl(localImage(part.img,"detail"));
+}
+
 function blankDay(d){
   return {sets:DAYS[d].ex.map(()=>[false,false,false,false]),notes:DAYS[d].ex.map(()=>"")};
 }
